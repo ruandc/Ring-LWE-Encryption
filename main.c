@@ -27,6 +27,15 @@ int compare_array(uint32_t * a, uint32_t * b)
 	return 1;
 }
 
+void dump_array(uint32_t * a)
+{
+	int i;
+	for (i=0; i<M; i++)
+	{
+		printf("%d,",a[i]);
+	}
+}
+
 void main()
 {
 	int i;
@@ -77,7 +86,8 @@ void main()
 		}
 		else
 		{
-			large1[j]=rand()%16;
+			for (j=0; j<M; j++)
+				large1[j]=rand()%2;
 		}
 
 		for (j=0; j<M; j++)
@@ -94,6 +104,11 @@ void main()
 		{
 			if (large2[j]!=large1[j])
 			{
+				printf("i=%d,j=%d",i,j);
+				printf("\nlarge1:");
+				dump_array(large1);
+				printf("\nlarge2:");
+				dump_array(large2);
 				res=0;
 				break;
 			}
