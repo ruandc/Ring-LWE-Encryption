@@ -90,6 +90,7 @@ void main()
 				large1[j]=rand()%2;
 		}
 
+		//Store a copy of large1 inside large2
 		for (j=0; j<M; j++)
 		{
 			large2[j]=large1[j];
@@ -98,7 +99,6 @@ void main()
 		fwd_ntt2(large2);
 		rearrange2(large2);
 		inv_ntt2(large2);
-
 
 		for (j=0; j<M; j++)
 		{
