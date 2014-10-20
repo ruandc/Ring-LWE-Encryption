@@ -41,7 +41,7 @@ void main()
 	int i;
 	int j;
 	int res;
-	uint32_t message[M],a[M],p[M],r2[M],c1[M],c2[M],large1[M],large2[M],a_0[M/2],a_1[M/2];
+	uint32_t message[M],a[M],p[M],r2[M],c1[M],c2[M],large1[M],large2[M],large3[M];
 
 /*
 	printf("knuth_yao: ");
@@ -77,18 +77,10 @@ void main()
 	for (i=0; (i<1000) && (res==1); i++)
 	{
 		srand(i);
-		if (i==0)
-		{
-			for (j=0; j<M; j++)
-			{
-				large1[j]=1;
-			}
-		}
-		else
-		{
-			for (j=0; j<M; j++)
-				large1[j]=rand()%2;
-		}
+
+		//Generate a message with a random bit in each element of the array
+		for (j=0; j<M; j++)
+			large1[j]=rand()%2;
 
 		//Store a copy of large1 inside large2
 		for (j=0; j<M; j++)
@@ -99,16 +91,12 @@ void main()
 		fwd_ntt2(large2);
 		rearrange2(large2);
 		inv_ntt2(large2);
+		rearrange2(large2);
 
 		for (j=0; j<M; j++)
 		{
 			if (large2[j]!=large1[j])
 			{
-				printf("i=%d,j=%d",i,j);
-				printf("\nlarge1:");
-				dump_array(large1);
-				printf("\nlarge2:");
-				dump_array(large2);
 				res=0;
 				break;
 			}
@@ -134,10 +122,10 @@ void main()
 	{
 		message_gen2(message);
 		bitreverse2(message);
-		key_gen2(a,p,r2);
+		key_gen(a,p,r2);
 
-		RLWE_enc2(a,c1,c2,message,p);
-		RLWE_dec2(c1,c2,r2);
+		rlwe_enc(a,c1,c2,message,p);
+		rlwe_dec(c1,c2,r2);
 
 		for(j=0; j<M; j++)
 		{
@@ -148,7 +136,7 @@ void main()
 		}
 
 		//Determine if the decryption was correct:
-		bitreverse2(message);
+		bitreverse2(message); //Reverse bits again to get message back to original form
 
 		rearrange_decrypted_message(c1,large1);
 		for (j=0; j<M; j++)
