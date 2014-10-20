@@ -765,13 +765,13 @@ void coefficient_sub2(uint32_t a[M], uint32_t b[M], uint32_t c[M])
 }
 
 
-void key_gen2(uint32_t a[M], uint32_t p[M], uint32_t r2[M])
+void key_gen(uint32_t a[M], uint32_t p[M], uint32_t r2[M])
 {
 	a_gen2(a);
 	r1_gen2(p);
 	r2_gen2(r2);
 
-	uint32_t tmp_a[M];
+	uint32_t tmp_a[M]; //Temporary storage for a*r2
 
 	//a = a*r2
 	coefficient_mul2(tmp_a, a, r2);
@@ -781,14 +781,14 @@ void key_gen2(uint32_t a[M], uint32_t p[M], uint32_t r2[M])
 	rearrange2(r2);
 }
 
-void RLWE_enc2(uint32_t a[M], uint32_t c1[M], uint32_t c2[M], uint32_t m[M], uint32_t p[M])
+void rlwe_enc(uint32_t a[M], uint32_t c1[M], uint32_t c2[M], uint32_t m[M], uint32_t p[M])
 {
 	int i;
-	uint32_t e1[M], e2[M], e3[M];
-	uint32_t encoded_m[M];
+	uint32_t e1[M], e2[M], e3[M], encoded_m[M];
+
 	for(i=0; i<M; i++)
 	{
-		encoded_m[i] = m[i] * QBY2;		// encoding of message
+		encoded_m[i] = m[i] * QBY2; 		//Encode the message
 	}
 
 	knuth_yao_basic_array(e1);
@@ -802,19 +802,17 @@ void RLWE_enc2(uint32_t a[M], uint32_t c1[M], uint32_t c2[M], uint32_t m[M], uin
 	fwd_ntt2(e3);
 
 	// m <-- a*e1
-	coefficient_mul2(c1,a,e1); 		// c1 <-- a*e1
-	coefficient_add2(c1,e2, c1);	// c1 <-- e2 + a*e1(tmp_m);
-	coefficient_mul2(c2,p,e1); 		// c2 <-- p*e1
-	coefficient_add2(c2, e3, c2);	// c2<-- e3 + p*e1
+	coefficient_mul2(c1,a,e1); 				// c1 <-- a*e1
+	coefficient_add2(c1,e2, c1);			// c1 <-- e2 + a*e1(tmp_m);
+	coefficient_mul2(c2,p,e1); 				// c2 <-- p*e1
+	coefficient_add2(c2, e3, c2);			// c2<-- e3 + p*e1
 
 	rearrange2(c1);
 	rearrange2(c2);
 }
 
-void RLWE_dec2(uint32_t c1[M], uint32_t c2[M], uint32_t r2[M])
+void rlwe_dec(uint32_t c1[M], uint32_t c2[M], uint32_t r2[M])
 {
-	int i;
-
 	coefficient_mul2(c1, c1, r2);	// c1 <-- c1*r2
 	coefficient_add2(c1, c1, c2);	// c1 <-- c1*r2 + c2
 
