@@ -28,7 +28,6 @@ void bitreverse2(uint32_t a[M]);
 
 
 uint32_t mod(int a);
-uint32_t compare_simd(uint32_t a_0[128],uint32_t a_1[128],uint32_t large[M]);
 uint32_t compare_large_simd(uint32_t large_simd[M/2],uint32_t large[M]);
 void coefficient_add2(uint32_t a[M], uint32_t b[M], uint32_t c[M]);
 void a_gen2(uint32_t a[]);
@@ -38,7 +37,7 @@ void key_gen(uint32_t a[M], uint32_t p[M], uint32_t r2[M]);
 void coefficient_mul_add2(uint32_t * result, uint32_t * large1, uint32_t * large2, uint32_t * large3);
 void coefficient_mul2(uint32_t a[M], uint32_t b[], uint32_t c[]);
 void coefficient_sub2(uint32_t a[M], uint32_t b[M], uint32_t c[M]);
-void message_gen2(uint32_t m[M]);
+void message_gen(uint32_t m[M]);
 void rlwe_enc(uint32_t a[M], uint32_t c1[M], uint32_t c2[M], uint32_t m[M], uint32_t p[M]);
 void rlwe_dec(uint32_t c1[M], uint32_t c2[M], uint32_t r2[M]);
 void coefficient_add(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[], uint32_t b_1[]);
@@ -46,11 +45,9 @@ void coefficient_mul(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[], uint32_t b_
 void coefficient_sub(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[], uint32_t b_1[]);
 
 void fwd_ntt2(uint32_t a[]);
-void inv_ntt2(uint32_t a[M]);
+void inv_ntt(uint32_t a[M]);
 
-void rearrange2(uint32_t a[M]);
-
-void get_ntt_random_numbers(uint32_t * large1, uint32_t * large2, int i);
+void rearrange(uint32_t a[M]);
 
 void rearrange_decrypted_message(uint32_t in[M],uint32_t out[M]);
 

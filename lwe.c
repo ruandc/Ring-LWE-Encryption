@@ -305,13 +305,9 @@ void r2_gen2(uint32_t r2[M])
  */
 
 
-void rearrange2(uint32_t a[M])
+void rearrange(uint32_t a[M])
 {
-	int i;
-	int bit1, bit2, bit3, bit4, bit5, bit6, bit7, bit8;
-	int swp_index;
-
-	int u1, t1, u2, t2;
+	int u1, t1, u2, t2, i, bit1, bit2, bit3, bit4, bit5, bit6, bit7, bit8, swp_index;
 
 	for(i=1; i<M/2; i++)
 	{
@@ -346,10 +342,9 @@ void rearrange2(uint32_t a[M])
 
 void bitreverse2(uint32_t a[M])
 {
-	int i;
-	int bit1, bit2, bit3, bit4, bit5, bit6, bit7, bit8, swp_index;
+	int i, swp_index, temp;
+	char bit1, bit2, bit3, bit4, bit5, bit6, bit7, bit8;
 	int q1, r1, q2, r2;
-	int temp;
 
 	for(i=0; i<M; i++)
 	{
@@ -397,35 +392,8 @@ void fwd_ntt2(uint32_t a[])
 	i=0;
 	for(m=2; m<=M/2; m=2*m)
 	{
-		/*
-		switch (m)
-		{
-			case 2: primrt=7680;
-					omega = 4298;
-					break;
-			case 4: primrt=4298;
-					omega = 6468;
-					break;
-			case 8: primrt=6468;
-					omega = 849;
-					break;
-			case 16:primrt=849;
-					omega = 2138;
-					break;
-			case 32:primrt=2138;
-					omega = 3654;
-					break;
-			case 64:primrt=3654;
-					omega = 1714;
-					break;
-			case 128:primrt=1714;
-					omega = 5118;
-					break;
-		}*/
-		//primrt=primrt_table[i];
-		//omega=omega_table[i];
-		primrt=primrt_omega_table[i];
-		omega=primrt_omega_table[i+1];
+		primrt=primitive_root_table[i];
+		omega=primitive_root_table[i+1];
 		i++;
 
 		for(j=0; j<m; j+=2)
@@ -444,16 +412,14 @@ void fwd_ntt2(uint32_t a[])
 
 				a[j+k+m] = mod(u1 - t1);
 				a[j+k+m+1] = mod(u2 - t2);
-
-				//printf("(j+k):%d (j+k+m):%d j:%d m:%d k:%d\n",j+m,j+m+k,j,m,k);
 			}
 			omega = omega * primrt;
 			omega = mod(omega);
 		}
 	}
 
-	primrt = FWD_CONST1; 	//mpz_set_str(primrt,"5118",10);
-	omega = FWD_CONST2;	//mpz_set_str(omega,"1065",10);
+	primrt = FWD_CONST1;
+	omega = FWD_CONST2;
 	for(j=0; j<M/2; j++)
 	{
 		t1 = omega * a[2*j+1];
@@ -469,46 +435,12 @@ void fwd_ntt2(uint32_t a[])
 	}
 }
 
-void rearrange(int a_0[], int a_1[])
+
+void inv_ntt(uint32_t a[M])
 {
-	int i;
-	int bit1, bit2, bit3, bit4, bit5, bit6, bit7, bit8;
-	int swp_index;
+	int i, j, k, m, u1, t1, u2, t2, primrt, omega;
 
-	int u1, t1, u2, t2;
-
-	for(i=0; i<M/2; i++)
-	{
-		bit1 = i%2;
-		bit2 = (i>>1)%2;
-		bit3 = (i>>2)%2;
-		bit4 = (i>>3)%2;
-		bit5 = (i>>4)%2;
-		bit6 = (i>>5)%2;
-		bit7 = (i>>6)%2;
-
-		swp_index = bit1*64 + bit2*32 + bit3*16 + bit4*8 + bit5*4 + bit6*2 + bit7;
-
-		if(swp_index>i)
-		{
-			u1 = a_0[i];
-			u2 = a_1[i];
-
-			a_0[i] = a_0[swp_index];
-			a_1[i] = a_1[swp_index];
-
-			a_0[swp_index] = u1;
-			a_1[swp_index] = u2;
-		}
-	}
-}
-
-void inv_ntt2(uint32_t a[M])
-{
-	int i, j, k, m;
-	int u1, t1, u2, t2;
-	int primrt, omega;
-
+	i=0;
 	for(m=2; m<=M/2; m=2*m)
 	{
 #ifdef NTT512
@@ -551,6 +483,8 @@ void inv_ntt2(uint32_t a[M])
 		}
 #endif
 
+		primrt = primrt_inv_omega_table[i];
+		i++;
 		omega = 1;
 		for(j=0; j<m/2; j++)
 		{
@@ -628,22 +562,6 @@ void inv_ntt2(uint32_t a[M])
 		a[j] = a[j] * 7651;
 		a[j] = mod(a[j]);
 	}*/
-}
-
-uint32_t compare_simd(uint32_t a_0[M/2],uint32_t a_1[M/2],uint32_t large[M])
-{
-	int j;
-	for (j=0; j<M/2; j++)
-	{
-		if (((large[j]&0xffff)!=a_0[j]) || ((large[j]>>16)!=a_1[j]))
-		{
-			//xprintf("j=%d ",j);
-			return 0;
-			break;
-		}
-	}
-
-	return 1;
 }
 
 void coefficient_add(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[], uint32_t b_1[])
@@ -771,14 +689,10 @@ void key_gen(uint32_t a[M], uint32_t p[M], uint32_t r2[M])
 	r1_gen2(p);
 	r2_gen2(r2);
 
-	uint32_t tmp_a[M]; //Temporary storage for a*r2
-
-	//a = a*r2
-	coefficient_mul2(tmp_a, a, r2);
-	//p = p-a*r2
-	coefficient_sub2(p, p, tmp_a);
-
-	rearrange2(r2);
+	uint32_t tmp_a[M]; 					//Temporary storage for a*r2
+	coefficient_mul2(tmp_a, a, r2); 	//a = a*r2
+	coefficient_sub2(p, p, tmp_a); 		//p = p-a*r2
+	rearrange(r2);
 }
 
 void rlwe_enc(uint32_t a[M], uint32_t c1[M], uint32_t c2[M], uint32_t m[M], uint32_t p[M])
@@ -807,8 +721,8 @@ void rlwe_enc(uint32_t a[M], uint32_t c1[M], uint32_t c2[M], uint32_t m[M], uint
 	coefficient_mul2(c2,p,e1); 				// c2 <-- p*e1
 	coefficient_add2(c2, e3, c2);			// c2<-- e3 + p*e1
 
-	rearrange2(c1);
-	rearrange2(c2);
+	rearrange(c1);
+	rearrange(c2);
 }
 
 void rlwe_dec(uint32_t c1[M], uint32_t c2[M], uint32_t r2[M])
@@ -816,45 +730,15 @@ void rlwe_dec(uint32_t c1[M], uint32_t c2[M], uint32_t r2[M])
 	coefficient_mul2(c1, c1, r2);	// c1 <-- c1*r2
 	coefficient_add2(c1, c1, c2);	// c1 <-- c1*r2 + c2
 
-	inv_ntt2(c1);
+	inv_ntt(c1);
 }
 
-void message_gen2(uint32_t m[M])
+void message_gen(uint32_t m[M])
 {
 	int i;
 	for(i=0;i<M;i++)
 	{
 		m[i] = get_rand()%2;
-	}
-}
-
-void get_ntt_random_numbers(uint32_t * large1, uint32_t * large2, int i)
-{
-	int j;
-	uint32_t rnd1,rnd2;
-
-	srand(i);
-	if (i==0)
-	{
-		for (j=0; j<M/2; j++)
-		{
-			rnd1=j+1;
-			rnd2=j+2;
-			large1[j]=(rnd1&0xffff)+((rnd2&0xffff)<<16);
-			large2[2*j]=rnd1;
-			large2[2*j+1]=rnd2;
-		}
-	}
-	else
-	{
-		for (j=0; j<M/2; j++)
-		{
-			rnd1=get_rand()&0x1FFF;
-			rnd2=get_rand()&0x1FFF;
-			large1[j]=(rnd1&0xffff)+((rnd2&0xffff)<<16);
-			large2[2*j]=rnd1;
-			large2[2*j+1]=rnd2;
-		}
 	}
 }
 
