@@ -22,6 +22,18 @@ The 256-bit security parameter set: n=512, q=12289, sigma=12.18/sqrrt(2*pi)
 	<th>Modulus (q)</th>
 	<th>Sigma</th>
     </tr>
+    <tr>
+	<td>128</td>
+	<td>256</td>
+	<td>7681</td>
+	<td>11.31/sqrrt(2*pi)</td>
+    </tr>
+    <tr>
+	<td>256</td>
+	<td>512</td>
+	<td>12289</td>
+	<td>12.18/sqrrt(2*pi)</td>
+    </tr>
 </table>
 
 Further Reading
