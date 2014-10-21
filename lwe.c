@@ -78,9 +78,7 @@ void knuth_yao_basic_array(uint32_t a[M])
 
 uint32_t knuth_yao_basic_single_number(uint32_t * rnd)
 {
-	int distance;
-	int row, column;
-	int index, sample, sample_msb;
+	int row, column, sample, distance;
 
 #ifdef DEBUG_PRINTF
 	printf("Start rnd:%d\n",*rnd);
@@ -307,7 +305,7 @@ void r2_gen2(uint32_t r2[M])
 
 void rearrange(uint32_t a[M])
 {
-	int u1, t1, u2, t2, i, bit1, bit2, bit3, bit4, bit5, bit6, bit7, bit8, swp_index;
+	int u1, u2, i, bit1, bit2, bit3, bit4, bit5, bit6, bit7, swp_index;
 
 	for(i=1; i<M/2; i++)
 	{
@@ -567,8 +565,7 @@ void inv_ntt(uint32_t a[M])
 void coefficient_add(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[], uint32_t b_1[])
 {
 	//a = a + b
-	int i, j, k;
-	int u1, t1, u2, t2;
+	int j;
 
 	for(j=0; j<M/2; j++)
 	{
@@ -582,8 +579,7 @@ void coefficient_add(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[], uint32_t b_
 void coefficient_mul(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[], uint32_t b_1[])
 {
 	//a = a * b
-	int i, j, k;
-	int u1, t1, u2, t2;
+	int j;
 
 	for(j=0; j<M/2; j++)
 	{
@@ -596,8 +592,7 @@ void coefficient_mul(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[], uint32_t b_
 
 void coefficient_sub(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[], uint32_t b_1[])
 {
-	int i, j, k, m;
-	int u1, t1, u2, t2;
+	int j;
 
 	for(j=0; j<M/2; j++)
 	{

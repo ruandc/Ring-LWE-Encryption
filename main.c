@@ -13,6 +13,7 @@
 #include "global.h"
 #include "lwe.h"
 #include "stdio.h"
+#include "stdlib.h"
 
 int compare_array(uint32_t * a, uint32_t * b)
 {
@@ -36,12 +37,12 @@ void dump_array(uint32_t * a)
 	}
 }
 
-void main()
+int main()
 {
 	int i;
 	int j;
 	int res;
-	uint32_t message[M],a[M],p[M],r2[M],c1[M],c2[M],large1[M],large2[M],large3[M];
+	uint32_t message[M],a[M],p[M],r2[M],c1[M],c2[M],large1[M],large2[M];
 
 /*
 	printf("knuth_yao: ");
@@ -89,9 +90,9 @@ void main()
 		}
 
 		fwd_ntt2(large2);
-		rearrange2(large2);
-		inv_ntt2(large2);
-		rearrange2(large2);
+		rearrange(large2);
+		inv_ntt(large2);
+		rearrange(large2);
 
 		for (j=0; j<M; j++)
 		{
@@ -120,7 +121,7 @@ void main()
 	*/
 	for(i=0; i<1000; i++)
 	{
-		message_gen2(message);
+		message_gen(message);
 		bitreverse2(message);
 		key_gen(a,p,r2);
 
@@ -154,4 +155,6 @@ void main()
 		printf("FAIL\n");
 	else
 		printf("PASS\n");
+
+	return 1;
 }
