@@ -5,6 +5,12 @@
 *
 * Written by Ruan de Clercq, Sujoy Sinha Roy,
 * Frederik Vercauteren, and Ingrid Verbauwhede
+*    ______      _____ _____ ______
+*   / ____/___  / ___//_  _// ____/
+*  / /   / __ \ \__ \  / / / /
+* / /___/ /_/ /___/ /_/ /_/ /___
+* \____/\____//____//____/\____/
+*
 * Computer Security and Industrial Cryptography (COSIC)
 * K.U.Leuven, Departement Electrical Engineering,
 * Celestijnenlaan 200A, B-3001 Leuven, Belgium
@@ -251,14 +257,14 @@ void a_gen2(uint32_t a[])
 		a[2*i+1] = mod((r>>16));
 	}
 
-	fwd_ntt2(a);
+	fwd_ntt(a);
 }
 
 
 void r1_gen2(uint32_t r1[])
 {
 	knuth_yao_basic_array(r1);
-	fwd_ntt2(r1);
+	fwd_ntt(r1);
 }
 
 void r2_gen2(uint32_t r2[M])
@@ -278,7 +284,7 @@ void r2_gen2(uint32_t r2[M])
 			r=r>>2;
 		}
 	}
-	fwd_ntt2(r2);
+	fwd_ntt(r2);
 }
 /*
  * void r2_gen2(int r2[M])
@@ -380,12 +386,11 @@ void bitreverse2(uint32_t a[M])
 	}
 }
 
-void fwd_ntt2(uint32_t a[])
+void fwd_ntt(uint32_t a[])
 {
 	int i, j, k, m;
 	int u1, t1, u2, t2;
 	int primrt, omega;
-
 
 	i=0;
 	for(m=2; m<=M/2; m=2*m)
@@ -441,7 +446,7 @@ void inv_ntt(uint32_t a[M])
 	i=0;
 	for(m=2; m<=M/2; m=2*m)
 	{
-		primrt = primitive_root_inv_table[i];
+		primrt = inv_primitive_root_table[i];
 		i++;
 		omega = 1;
 		for(j=0; j<m/2; j++)
@@ -497,14 +502,14 @@ void inv_ntt(uint32_t a[M])
 		a[j] = omega * a[j];
 		a[j] = mod(a[j]);
 
-		a[j] = a[j]*SCALING;
+		a[j] = a[j]*INVERSE_N; //Fix for negative-wrapped convolution
 		a[j] = mod(a[j]);
 
 		j++;
 		a[j] = omega2 * a[j];
 		a[j] = mod(a[j]);
 
-		a[j] = a[j]*SCALING;
+		a[j] = a[j]*INVERSE_N; //Fix for negative-wrapped convolution
 		a[j] = mod(a[j]);
 		j++;
 
@@ -513,13 +518,6 @@ void inv_ntt(uint32_t a[M])
 		omega2 = omega2 * primrt;
 		omega2 = mod(omega2);
 	}
-	/*
-	omega = 1;
-	for(j=0; j<M; j++)
-	{
-		a[j] = a[j] * 7651;
-		a[j] = mod(a[j]);
-	}*/
 }
 
 void coefficient_add(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[], uint32_t b_1[])
@@ -666,9 +664,9 @@ void rlwe_enc(uint32_t a[M], uint32_t c1[M], uint32_t c2[M], uint32_t m[M], uint
 
 	coefficient_add2(e3, e3, encoded_m);	// e3 <-- e3 + m
 
-	fwd_ntt2(e1);
-	fwd_ntt2(e2);
-	fwd_ntt2(e3);
+	fwd_ntt(e1);
+	fwd_ntt(e2);
+	fwd_ntt(e3);
 
 	// m <-- a*e1
 	coefficient_mul2(c1,a,e1); 				// c1 <-- a*e1

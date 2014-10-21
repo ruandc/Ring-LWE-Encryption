@@ -85,7 +85,7 @@
 	#define INVCONST1 3778
 	#define INVCONST2 10810
 	#define INVCONST3 9087
-	#define SCALING 12265
+	#define INVERSE_N 12265
 
 	#define COEFFICIENT_ALL_ONES 0x3FFF//14 bits
 
@@ -103,7 +103,7 @@
 	#define INVCONST1 2880
 	#define INVCONST2 3383
 	#define INVCONST3 2481
-	#define SCALING 7651
+	#define INVERSE_N 7651
 	#define COEFFICIENT_ALL_ONES 0x1FFF//13 bits
 #endif
 

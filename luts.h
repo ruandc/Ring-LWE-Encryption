@@ -5,6 +5,12 @@
 *
 * Written by Ruan de Clercq, Sujoy Sinha Roy,
 * Frederik Vercauteren, and Ingrid Verbauwhede
+*    ______      _____ _____ ______
+*   / ____/___  / ___//_  _// ____/
+*  / /   / __ \ \__ \  / / / /
+* / /___/ /_/ /___/ /_/ /_/ /___
+* \____/\____//____//____/\____/
+*
 * Computer Security and Industrial Cryptography (COSIC)
 * K.U.Leuven, Departement Electrical Engineering,
 * Celestijnenlaan 200A, B-3001 Leuven, Belgium
@@ -19,7 +25,7 @@
 /* Declare these as global: */
 #ifdef NTT512
 	uint16_t primitive_root_table[9]={12288,1479,8246,4134,6429,1351,7678,7935,5559};
-	uint16_t primitive_root_inv_table[8] = {12288,10810,7143,10984,3542,4821,1170,5755};
+	uint16_t inv_primitive_root_table[8] = {12288,10810,7143,10984,3542,4821,1170,5755};
 #else
 	uint16_t primrt_table[7]={7680,4298,6468,849,2138,3654,1714};
 	uint16_t omega_table[7] ={4298,6468,849,2138,3654,1714,5118};
@@ -30,7 +36,10 @@
 	 */
 	uint16_t primitive_root_table[8]={7680,4298,6468,849,2138,3654,1714,5118};
 
-	uint16_t primitive_root_inv_table[7] = {7680,3383,5756,1728,7584,6569,6601};
+	/* primitive_root_table contains the inverse of the primitive roots of unity for the powers of two
+	 * e.g., 3383 = 4298^(-1) % 7681
+	 */
+	uint16_t inv_primitive_root_table[7] = {7680,3383,5756,1728,7584,6569,6601};
 #endif
 
 #ifdef KNUTH_YAO_512

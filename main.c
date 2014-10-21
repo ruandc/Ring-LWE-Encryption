@@ -5,6 +5,12 @@
 *
 * Written by Ruan de Clercq, Sujoy Sinha Roy,
 * Frederik Vercauteren, and Ingrid Verbauwhede
+*    ______      _____ _____ ______
+*   / ____/___  / ___//_  _// ____/
+*  / /   / __ \ \__ \  / / / /
+* / /___/ /_/ /___/ /_/ /_/ /___
+* \____/\____//____//____/\____/
+*
 * Computer Security and Industrial Cryptography (COSIC)
 * K.U.Leuven, Departement Electrical Engineering,
 * Celestijnenlaan 200A, B-3001 Leuven, Belgium
@@ -72,7 +78,7 @@ int main()
 	else
 		printf("OK!\n");*/
 
-	printf("Fwd/Inv_ntt2: ");
+	printf("Test for Fwd/Inv NTT: ");
 	res=1;
 	res = 1;
 	for (i=0; (i<1000) && (res==1); i++)
@@ -89,7 +95,7 @@ int main()
 			large2[j]=large1[j];
 		}
 
-		fwd_ntt2(large2);
+		fwd_ntt(large2);
 		rearrange(large2);
 		inv_ntt(large2);
 		rearrange(large2);
@@ -110,7 +116,7 @@ int main()
 
 
 	int fail=0;
-	printf("Enc/Dec: ");
+	printf("Test for Encryption and Decryption: ");
 	/*This test procedure tries to determine whether the cryptosystem works.
 	 * It does the following tasks:
 	 * 1. Generate a random message
