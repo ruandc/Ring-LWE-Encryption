@@ -18,20 +18,19 @@
 
 /* Declare these as global: */
 #ifdef NTT512
-	uint16_t primrt_table[8]={12288,1479,8246,4134,6429,1351,7678,7935};
-	uint16_t omega_table[8] ={1479,8246,4134,6429,1351,7678,7935,5559};
 	uint16_t primitive_root_table[9]={12288,1479,8246,4134,6429,1351,7678,7935,5559};
-	uint16_t primrt_inv_omega_table[8] = {12288,10810,7143,10984,3542,4821,1170,5755};
+	uint16_t primitive_root_inv_table[8] = {12288,10810,7143,10984,3542,4821,1170,5755};
 #else
 	uint16_t primrt_table[7]={7680,4298,6468,849,2138,3654,1714};
 	uint16_t omega_table[7] ={4298,6468,849,2138,3654,1714,5118};
 
-	/*primitive_root_table contains all the primitive roots of unity
+	/* primitive_root_table contains the primitive roots of unity for the powers of two
+	 * -> primitive_root_table[i]^(i*i) mod modulus = 1
 	 * e.g., 7680^2 % 7681 = 1, 4298 ^ 4 % 7681 = 1 , etc.
 	 */
 	uint16_t primitive_root_table[8]={7680,4298,6468,849,2138,3654,1714,5118};
 
-	uint16_t primrt_inv_omega_table[7] = {7680,3383,5756,1728,7584,6569,6601};
+	uint16_t primitive_root_inv_table[7] = {7680,3383,5756,1728,7584,6569,6601};
 #endif
 
 #ifdef KNUTH_YAO_512

@@ -441,47 +441,7 @@ void inv_ntt(uint32_t a[M])
 	i=0;
 	for(m=2; m<=M/2; m=2*m)
 	{
-#ifdef NTT512
-		switch (m)
-		{
-			case 2: primrt=12288;
-					break;
-			case 4: primrt=10810;
-					break;
-			case 8: primrt=7143;
-					break;
-			case 16:primrt=10984;
-					break;
-			case 32:primrt=3542;
-					break;
-			case 64:primrt=4821;
-					break;
-			case 128:primrt=1170;
-					break;
-			case 256:primrt=5755;
-					break;
-		}
-#else
-		switch (m)
-		{
-			case 2: primrt=7680;
-					break;
-			case 4: primrt=3383;
-					break;
-			case 8: primrt=5756;
-					break;
-			case 16:primrt=1728;
-					break;
-			case 32:primrt=7584;
-					break;
-			case 64:primrt=6569;
-					break;
-			case 128:primrt=6601;
-					break;
-		}
-#endif
-
-		primrt = primrt_inv_omega_table[i];
+		primrt = primitive_root_inv_table[i];
 		i++;
 		omega = 1;
 		for(j=0; j<m/2; j++)
