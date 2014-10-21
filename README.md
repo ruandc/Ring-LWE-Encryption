@@ -13,7 +13,7 @@ This project supports two security parameter sets.
 
 The 128-bit security parameter set: n=256, q=7681, sigma=11.31/sqrrt(2*pi)
 
-The 256-bit security parameter set: n=512, q=12289, sigma=11.31/sqrrt(2*pi)
+The 256-bit security parameter set: n=512, q=12289, sigma=12.18/sqrrt(2*pi) <sup>aa</sup>
 
 Further Reading
 ==========
