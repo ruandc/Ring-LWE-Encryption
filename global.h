@@ -19,8 +19,9 @@
 #ifndef __GLOBAL_H_
 #define __GLOBAL_H_
 
-//#define USE_FAKE_GET_RAND
+#include "stdint.h"
 
+//#define USE_FAKE_GET_RAND
 //#define GENERATE_BINARY_RANDOM_BITS
 //#define GENERATE_ASCII_RANDOM_BITS
 #define NUMBER_OF_RANDOM_BITS 10000000
@@ -121,4 +122,7 @@
 #define NEW_RND_LARGE 32-9
 #define NEW_RND_MID 32-6
 */
+
+typedef uint16_t coeff;
+
 #endif
