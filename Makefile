@@ -8,7 +8,9 @@ LDFLAGS=
 #SOURCES=LWE2.c
 
 SOURCES=main.c \
-		lwe.c
+		unit_test.c \
+		lwe.c \
+		files.c
 		
 OBJECTS1=$(SOURCES:.S=.o)
 OBJECTS2=$(OBJECTS1:.s=.o)
