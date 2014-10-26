@@ -21,4 +21,5 @@
 int read_hex_file(char * file_name, uint32_t * out, int max_size);
 int write_hex_file(char * file_name, uint32_t * output, int len);
 void read_binary_file(char *name, char * buffer); //unused?
+int read_text_file(char * file_name, char * buffer);
 #endif

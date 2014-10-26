@@ -61,14 +61,14 @@ int write_hex_file(char * file_name, uint32_t * output, int len)
 	if (!ptr_file)
 		return 1;
 
-	int i,j;
+	int i;
 	for (i=0; i<len; i++)
 	{
 		//for (j=0; j<4; j++)
 		//{
 		//	fprintf(ptr_file, "%x", ((output[i]>>(8*j))&0xff));
 		//}
-		fprintf(ptr_file, "%.8x", output[i]);
+		fprintf(ptr_file, "%.4x", output[i]);
     }
 
 	fclose(ptr_file);
@@ -84,9 +84,9 @@ int read_hex_file(char * file_name, uint32_t * out, int max_size)
 		return 1;
 
 	int i=0;
-	char buffer[9]; //Apparently zero is also stored at end of buffer.
+	char buffer[5]; //Apparently zero is also stored at end of buffer.
 					//Therefore read '9' characters for each 32-bit element
-	while ((i<max_size) && (fgets(buffer,9,ptr_file)!=NULL))
+	while ((i<max_size) && (fgets(buffer,5,ptr_file)!=NULL))
 	{
 		out[i++] = strtol(buffer,NULL,16);
 	}
