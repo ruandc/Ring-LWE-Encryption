@@ -1,0 +1,6 @@
+Script started on Thu 04 Sep 2014 05:12:43 PM CEST
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ exitscreen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ exit
+exit
+
+Script done on Thu 04 Sep 2014 05:12:59 PM CEST

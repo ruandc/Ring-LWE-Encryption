@@ -1,0 +1,110 @@
+Script started on Thu 04 Sep 2014 04:51:46 PM CEST
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ svn cimake uartgdb-server[6Puart[3Psvn cimake uartgdb-server[5Pcleangdb-servergrep coefficient_add_asm *screen /dev/ttyUSB0 115200[14Pmake programscreen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ cat a,txt
+cat: a,txt: No such file or directory
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ cat a,txt[C[1Ptxt.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ls
+total 1.2M
+drwxr-xr-x.  3 rdeclerc cosic 4.0K Sep  4 16:50 [0m[01;34m.[0m
+drwxr-xr-x. 24 rdeclerc cosic 4.0K Sep  3 15:31 [01;34m..[0m
+drwxr-xr-x.  6 rdeclerc cosic 4.0K Sep  4 11:30 [01;34m.svn[0m
+-rw-r--r--.  1 rdeclerc cosic    0 Sep  4 16:50 a.txt
+-rw-r--r--.  1 rdeclerc cosic  971 Sep  3 14:03 code_size.py
+-rwxr-xr-x.  1 rdeclerc cosic 6.8K Sep  3 14:03 [01;32mcomm.c[0m
+-rwxr-xr-x.  1 rdeclerc cosic  312 Sep  3 14:03 [01;32mcomm.h[0m
+-rw-r--r--.  1 rdeclerc cosic 3.8K Sep  3 15:16 .cproject
+-rw-r--r--.  1 rdeclerc cosic  259 Sep  3 14:03 global.c
+-rw-r--r--.  1 rdeclerc cosic 1.6K Sep  4 16:49 global.h
+-rw-r--r--.  1 rdeclerc cosic 1.3K Sep  3 14:49 global.h~
+-rw-r--r--.  1 rdeclerc cosic 7.0K Sep  3 14:54 knuth_yao_asm_broken.S
+-rw-r--r--.  1 rdeclerc cosic 6.7K Sep  3 15:57 knuth_yao_asm_good.S
+-rw-r--r--.  1 rdeclerc cosic  203 Sep  3 14:03 knuth_yao_asm.h
+-rw-r--r--.  1 rdeclerc cosic 6.6K Sep  4 14:45 knuth_yao_asm.S
+-rwxr-xr-x.  1 rdeclerc cosic  45K Sep  4 15:28 [01;32mluts.h[0m
+-rwxr-xr-x.  1 rdeclerc cosic  14K Sep  4 15:02 [01;32mlwe.c[0m
+-rw-r--r--.  1 rdeclerc cosic  22K Sep  3 14:03 lwe.c~
+-rwxr-xr-x.  1 rdeclerc cosic 1.8K Sep  4 11:27 [01;32mlwe.h[0m
+-rwxr-xr-x.  1 rdeclerc cosic 109K Sep  4 16:50 [01;32mmain.bin[0m
+-rw-r--r--.  1 rdeclerc cosic 7.5K Sep  4 16:49 main.c
+-rw-r--r--.  1 rdeclerc cosic  23K Sep  3 14:56 main.c~
+-rwxr-xr-x.  1 rdeclerc cosic 377K Sep  4 16:50 [01;32mmain.elf[0m
+-rw-r--r--.  1 rdeclerc cosic 305K Sep  4 16:50 main.hex
+-rwxr-xr-x.  1 rdeclerc cosic 3.0K Sep  4 10:25 [01;32mMakefile[0m
+-rw-r--r--.  1 rdeclerc cosic  814 Sep  3 14:03 .project
+-rw-r--r--.  1 rdeclerc cosic 9.2K Sep  4 11:33 speed_test.c
+-rw-r--r--.  1 rdeclerc cosic   98 Sep  3 14:03 speed_test.h
+-rw-r--r--.  1 rdeclerc cosic  24K Sep  3 14:03 startup_stm32f40xx.s
+-rw-r--r--.  1 rdeclerc cosic 3.7K Sep  3 14:03 stm32f4xx_conf.h
+-rw-r--r--.  1 rdeclerc cosic 4.5K Sep  3 14:03 stm32f4xx_it.c
+-rw-r--r--.  1 rdeclerc cosic 2.2K Sep  3 14:03 stm32f4xx_it.h
+-rwxr-xr-x.  1 rdeclerc cosic 4.9K Sep  3 14:03 [01;32mstm32_flash.ld[0m
+-rw-r--r--.  1 rdeclerc cosic  22K Sep  3 14:03 system_stm32f4xx.c
+-rwxr-xr-x.  1 rdeclerc cosic 4.2K Sep  3 14:03 [01;32mterm_io.c[0m
+-rwxr-xr-x.  1 rdeclerc cosic  545 Sep  3 14:03 [01;32mterm_io.h[0m
+-rw-r--r--.  1 rdeclerc cosic 4.4K Sep  3 17:01 test_asm.c
+-rwxr-xr-x.  1 rdeclerc cosic 1.8K Sep  4 10:31 [01;32mtest_asm.h[0m
+-rw-r--r--.  1 rdeclerc cosic  27K Sep  4 11:32 test_asm.S
+-rw-r--r--.  1 rdeclerc cosic  21K Sep  4 11:32 throw_away.c
+-rw-r--r--.  1 rdeclerc cosic  13K Sep  4 14:42 unit_test.c
+-rw-r--r--.  1 rdeclerc cosic   76 Sep  4 10:25 unit_test.h
+[m[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ls a.txt 
+-rw-r--r--. 1 rdeclerc cosic 0 Sep  4 16:50 a.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ls a.txt [Kcat a.txt,txtscreen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB0 115200[17Pls a.txt [Kcat a.txt,txtscreen /dev/ttyUSB0 115200vn ci[Kmake uartgdb-server[6Puart[3Psvn cimake uartgdb-server[6Puart[3Psvn cicreen /dev/ttyUSB0 115200[17Pcat a,txt.txtls[K a.txt screen /dev/ttyUSB0 115200[KSCRIPT ^C
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ script a.txt
+Script started, file is a.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ svn cimake uartgdb-server[6Puart[3Psvn cimake uartgdb-server[5Pcleangdb-servergrep coefficient_add_asm *screen /dev/ttyUSB0 115200[14Pmake programscreen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ls a.txt 
+-rw-r--r--. 1 rdeclerc cosic 0 Sep  4 16:50 a.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ls a.txt 
+-rw-r--r--. 1 rdeclerc cosic 0 Sep  4 16:50 a.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ls a.txt 
+-rw-r--r--. 1 rdeclerc cosic 0 Sep  4 16:50 a.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ls a.txt 
+-rw-r--r--. 1 rdeclerc cosic 0 Sep  4 16:50 a.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ls a.txt 
+-rw-r--r--. 1 rdeclerc cosic 0 Sep  4 16:50 a.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ls a.txt 
+-rw-r--r--. 1 rdeclerc cosic 0 Sep  4 16:50 a.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ls a.txt 
+-rw-r--r--. 1 rdeclerc cosic 0 Sep  4 16:50 a.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ls a.txt 
+-rw-r--r--. 1 rdeclerc cosic 0 Sep  4 16:50 a.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ls a.txt screen /dev/ttyUSB0 115200vn ci[Kmake uartgdb-server[6Puart[3Psvn cimake uartgdb-server^C
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ script a.txt
+Script started, file is a.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ svn cimake uartgdb-server[6Puart[3Psvn cimake uartgdb-server[5Pcleangdb-servergrep coefficient_add_asm *screen /dev/ttyUSB0 115200[14Pmake programscreen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ kscreen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB0 115200[1P 1152001 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB1 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB1 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB1 1152000[C[C[C[C[C[C[C
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ screen /dev/ttyUSB0 115200
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ps aux | grep Serial
+[32m[K223[m[K[36m[K:[m[Krdeclerc 13808  0.0  0.0 103260   916 pts/8    S+   16:59   0:00 grep -I --line-number --color=always [01;31m[KSerial[m[K
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ps aux | grep Serial[C[1Perial[1Prial[1Pial[1Pal[1Pl[KMonitor
+[32m[K223[m[K[36m[K:[m[Krdeclerc 13847  0.0  0.0 103260   916 pts/8    S+   16:59   0:00 grep -I --line-number --color=always [01;31m[KMonitor[m[K
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ ps aux | grep Monitor[K[K[K[K[K[K[Kscreen
+[32m[K192[m[K[36m[K:[m[Krdeclerc 10598  0.0  0.7 295728 28000 ?        Ss   Aug11   1:28 gnome-[01;31m[Kscreen[m[Ksaver
+[32m[K214[m[K[36m[K:[m[Krdeclerc 12884  0.0  0.0 129692   324 pts/0    S+   Aug11   0:04 [01;31m[Kscreen[m[K -S 1
+[32m[K223[m[K[36m[K:[m[Krdeclerc 13866  0.0  0.0 103264  1000 pts/8    S+   16:59   0:00 grep -I --line-number --color=always [01;31m[Kscreen[m[K
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ exit
+exit
+Script done, file is a.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ exit
+exit
+Script done, file is a.txt
+[rdeclerc@judas stm32f407-discovery-rlwe-r550]$ exit
+exit
+
+Script done on Thu 04 Sep 2014 04:59:16 PM CEST

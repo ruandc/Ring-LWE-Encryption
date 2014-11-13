@@ -1,0 +1,197 @@
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/RuanDeClercq/!svn/ver/570/ring-lwe/stm32f407-discovery-rlwe
+END
+test_asm.S
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/RuanDeClercq/!svn/ver/583/ring-lwe/stm32f407-discovery-rlwe/test_asm.S
+END
+comm.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/RuanDeClercq/!svn/ver/513/ring-lwe/stm32f407-discovery-rlwe/comm.h
+END
+stm32_flash.ld
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/RuanDeClercq/!svn/ver/513/ring-lwe/stm32f407-discovery-rlwe/stm32_flash.ld
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/RuanDeClercq/!svn/ver/513/ring-lwe/stm32f407-discovery-rlwe/.project
+END
+startup_stm32f40xx.s
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/RuanDeClercq/!svn/ver/513/ring-lwe/stm32f407-discovery-rlwe/startup_stm32f40xx.s
+END
+knuth_yao_asm.h
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/RuanDeClercq/!svn/ver/513/ring-lwe/stm32f407-discovery-rlwe/knuth_yao_asm.h
+END
+.cproject
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/RuanDeClercq/!svn/ver/617/ring-lwe/stm32f407-discovery-rlwe/.cproject
+END
+code_size.py
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/RuanDeClercq/!svn/ver/584/ring-lwe/stm32f407-discovery-rlwe/code_size.py
+END
+unit_test.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/RuanDeClercq/!svn/ver/617/ring-lwe/stm32f407-discovery-rlwe/unit_test.c
+END
+test_asm.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/RuanDeClercq/!svn/ver/557/ring-lwe/stm32f407-discovery-rlwe/test_asm.c
+END
+unit_test.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/RuanDeClercq/!svn/ver/560/ring-lwe/stm32f407-discovery-rlwe/unit_test.h
+END
+test_asm.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/RuanDeClercq/!svn/ver/560/ring-lwe/stm32f407-discovery-rlwe/test_asm.h
+END
+luts.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/RuanDeClercq/!svn/ver/617/ring-lwe/stm32f407-discovery-rlwe/luts.h
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/RuanDeClercq/!svn/ver/617/ring-lwe/stm32f407-discovery-rlwe/Makefile
+END
+term_io.c
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/RuanDeClercq/!svn/ver/513/ring-lwe/stm32f407-discovery-rlwe/term_io.c
+END
+speed_test.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/RuanDeClercq/!svn/ver/562/ring-lwe/stm32f407-discovery-rlwe/speed_test.c
+END
+global.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/RuanDeClercq/!svn/ver/513/ring-lwe/stm32f407-discovery-rlwe/global.c
+END
+knuth_yao_asm_small_tables.S
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/RuanDeClercq/!svn/ver/617/ring-lwe/stm32f407-discovery-rlwe/knuth_yao_asm_small_tables.S
+END
+term_io.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/RuanDeClercq/!svn/ver/513/ring-lwe/stm32f407-discovery-rlwe/term_io.h
+END
+speed_test.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/RuanDeClercq/!svn/ver/513/ring-lwe/stm32f407-discovery-rlwe/speed_test.h
+END
+global.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/RuanDeClercq/!svn/ver/617/ring-lwe/stm32f407-discovery-rlwe/global.h
+END
+main.bin
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/RuanDeClercq/!svn/ver/617/ring-lwe/stm32f407-discovery-rlwe/main.bin
+END
+stm32f4xx_it.c
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/RuanDeClercq/!svn/ver/513/ring-lwe/stm32f407-discovery-rlwe/stm32f4xx_it.c
+END
+knuth_yao_asm.S
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/RuanDeClercq/!svn/ver/588/ring-lwe/stm32f407-discovery-rlwe/knuth_yao_asm.S
+END
+stm32f4xx_it.h
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/RuanDeClercq/!svn/ver/513/ring-lwe/stm32f407-discovery-rlwe/stm32f4xx_it.h
+END
+main.c
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/RuanDeClercq/!svn/ver/566/ring-lwe/stm32f407-discovery-rlwe/main.c
+END
+system_stm32f4xx.c
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/RuanDeClercq/!svn/ver/513/ring-lwe/stm32f407-discovery-rlwe/system_stm32f4xx.c
+END
+lwe.c
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/RuanDeClercq/!svn/ver/614/ring-lwe/stm32f407-discovery-rlwe/lwe.c
+END
+knuth_yao_asm_small_tables.h
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/RuanDeClercq/!svn/ver/617/ring-lwe/stm32f407-discovery-rlwe/knuth_yao_asm_small_tables.h
+END
+comm.c
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/RuanDeClercq/!svn/ver/566/ring-lwe/stm32f407-discovery-rlwe/comm.c
+END
+lwe.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/RuanDeClercq/!svn/ver/614/ring-lwe/stm32f407-discovery-rlwe/lwe.h
+END
+stm32f4xx_conf.h
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/RuanDeClercq/!svn/ver/513/ring-lwe/stm32f407-discovery-rlwe/stm32f4xx_conf.h
+END
