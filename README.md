@@ -44,8 +44,6 @@ For a more detailed mathematical explanation of the Ring-LWE encryption scheme s
 TODO
 ==========
 <ul>
-<li>Finish the file handling functionality</li>
-<li>Add command-line parameter support</li>
 <li>Convert lwe.c and lwe.h to use uint16_t instead of uint32_t</li>
 </ul>
 
