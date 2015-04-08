@@ -120,7 +120,10 @@ void main()
 		}
 		else
 		{
-			large1[j]=rand()%16;
+			for (j=0; j<M; j++)
+			{
+				large1[j]=rand()%16;
+			}
 		}
 
 		for (j=0; j<M; j++)
@@ -131,6 +134,7 @@ void main()
 		fwd_ntt2(large2);
 		rearrange2(large2);
 		inv_ntt2(large2);
+		rearrange2(large2);
 
 
 		for (j=0; j<M; j++)
