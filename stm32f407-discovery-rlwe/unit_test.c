@@ -4,10 +4,47 @@
 #include "term_io.h"
 #include "stdlib.h"
 #include "knuth_yao_asm.h"
-#include "knuth_yao_asm_small_tables.h"
+#include "knuth_yao_asm_shuffle.h"
+//#include "knuth_yao_asm_small_tables.h"
 #include "unit_test.h"
 #include "lwe.h"
 #include "stdint.h"
+#include "stdlib.h"
+
+
+int compare_uint32(const void * a[2], const void * b[2])
+{
+	return ( *(uint32_t*)a - *(uint32_t*)b );
+}
+
+int compare_uint16(const void * a[2], const void * b[2])
+{
+   return ( *(uint16_t*)a - *(uint16_t*)b );
+}
+
+void convert_to_uint16_t_array(uint32_t *in, uint16_t *out)
+{
+	int i;
+	for (i=0; i<M; i++)
+	{
+		out[i]=in[i];
+	}
+}
+
+int memcompare(uint16_t *a, uint16_t *b, int number_of_elements)
+{
+	int i;
+	for (i=0; i<number_of_elements; i++)
+	{
+		if (a[i]!=b[i])
+		{
+			xprintf("i=%d\n",i);
+			return 0;
+		}
+	}
+
+	return 1;
+}
 
 void perform_unit_tests()
 {
@@ -87,6 +124,80 @@ void perform_unit_tests()
 		}
 	#endif
 
+		xputs("knuth_yao_shuffled: ");
+		fail = 0;
+		for (i = 0; i < UNIT_TEST_SMALL_LOOPS; i++)
+		{
+			if ((i%100)==0)
+				xprintf(".");
+
+			uint16_t small1[M], small2[M], small3[M];
+
+			// Test knuth-yao
+			srand(i * i);
+			knuth_yao_shuffled(small1);
+
+			srand(i * i);
+			knuth_yao_small(small2);
+
+			srand(i * i);
+			knuth_yao_asm_shuffle(small3);
+
+			//qsort (small1, M, sizeof (uint16_t), compare_uint16);
+			//qsort (small2, M, sizeof (uint16_t), compare_uint16);
+			//qsort (small3, M, sizeof (uint16_t), compare_uint16);
+
+			if (memcompare(small2, small1, M) != 1)
+			{
+				xputs("knuth_yao_small fail");
+				fail = 1;
+				break;
+			}
+
+			if (memcompare(small3, small1, M) != 1)
+			{
+				xputs("knuth_yao_asm_shuffle fail");
+				fail = 1;
+				break;
+			}
+		}
+		if (fail == 1)
+			xputs("BAD!\n");
+		else
+			xputs("OK!\n");
+
+
+		xputs("knuth_yao_shuffled2: ");
+		fail = 0;
+		for (i = 0; i < UNIT_TEST_SMALL_LOOPS; i++)
+		{
+			if ((i%100)==0)
+				xprintf(".");
+		  // Test knuth-yao
+		  srand(i * i);
+		  knuth_yao_asm_shuffle(large1);
+
+		  srand(i * i);
+		  knuth_yao2(large2);
+
+		  //Sort large1 & large2 and check if they are equivalent
+		  //qsort (large1, M, sizeof (uint16_t), (__compar_fn_t)compare_uint16);
+		  //qsort (large2, M, sizeof (uint16_t), (__compar_fn_t)compare_uint16);
+
+		  uint16_t small[M];
+		  convert_to_uint16_t_array(large2,small);
+		  if (memcompare(small, (uint16_t*)large1, M/2) == 0)
+		  //if (!compare_large_simd2(large1,large2))
+		  {
+			  fail = 1;
+			  break;
+		  }
+		}
+		if (fail == 1)
+			xputs("FAIL!\n");
+		else
+			xputs("OK!\n");
+
 		xprintf("knuth_yao_asm:");
 		fail=0;
 		for (i=0; i<UNIT_TEST_SMALL_LOOPS; i++)
@@ -114,6 +225,9 @@ void perform_unit_tests()
 		{
 			xprintf("OK\n");
 		}
+
+
+
 
 		xputs("coefficient_add_asm:");
 		fail=0;

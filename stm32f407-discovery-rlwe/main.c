@@ -1,7 +1,6 @@
 #include <stm32f4xx.h>
 #include <misc.h>			 // I recommend you have a look at these in the ST firmware folder
 #include <stm32f4xx_usart.h> // under Libraries/STM32F4xx_StdPeriph_Driver/inc and src
-
 #include <stm32f4xx_usart.h>
 #include <stm32f4xx_rcc.h>
 #include <lwe.h>
@@ -12,10 +11,6 @@
 #include "stdlib.h"
 #include "knuth_yao_asm.h"
 #include "unit_test.h"
-
-
-
-
 
 void Delay(__IO uint32_t nCount) {
   while(nCount--) {
@@ -139,16 +134,12 @@ void initAll ()
 	RNG_Cmd(ENABLE);
 }
 
-
 /*
 #ifdef NTT512
 #else
 uint16_t primrt_inv_omega_table[7] = {7680,3383,5756,1728,7584,6569,6601};
 uint16_t primrt_omega_table_asm[8] = {7680,4298,6468,849,2138,3654,1714,5118};
 #endif*/
-
-
-
 
 void print_array(uint32_t a[])
 {
@@ -164,6 +155,7 @@ int main (void)
 	initAll();
 
 	xprintf("Startup!");
+
 #ifdef GENERATE_ASCII_RANDOM_BITS
 
 	uint32_t i,j;
@@ -208,7 +200,6 @@ int main (void)
 
 	while (1)
 	{
-
 	}
 
 	return 0;
