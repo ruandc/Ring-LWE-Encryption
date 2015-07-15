@@ -86,9 +86,9 @@ void knuth_yao_small(uint16_t a[M])
 
 void knuth_yao_shuffled(uint16_t result[M])
 {
-  int i;
+  int i, sample_in_table;
   uint16_t sample;
-  uint32_t rnd, sample_in_table;
+  uint32_t rnd;
   int counter1=0;
   int counter2=0;
   rnd = get_rand();
@@ -99,22 +99,8 @@ void knuth_yao_shuffled(uint16_t result[M])
 #else
 	sample_in_table=0xff;
     sample = knuth_yao_single_number(&rnd,&sample_in_table);
-    result[2 * i] = sample;
+    //result[2 * i] = sample;
 
-/*    if (sample_in_table==1) {
-    	result[counter1]=sample;
-    	 counter1++;
-    }
-    else
-    {
-    	result[M-counter2-1]=sample;
-    	counter2++;
-    }
-    */
-
-    sample = knuth_yao_single_number(&rnd,&sample_in_table);
-    result[2 * i+1] = sample;
-/*
     if (sample_in_table==1) {
     	result[counter1]=sample;
     	 counter1++;
@@ -124,7 +110,20 @@ void knuth_yao_shuffled(uint16_t result[M])
     	result[M-counter2-1]=sample;
     	counter2++;
     }
-    */
+
+    sample = knuth_yao_single_number(&rnd,&sample_in_table);
+//    result[2 * i+1] = sample;
+
+    if (sample_in_table==1) {
+    	result[counter1]=sample;
+    	 counter1++;
+    }
+    else
+    {
+    	result[M-counter2-1]=sample;
+    	counter2++;
+    }
+
 #endif
   }
 

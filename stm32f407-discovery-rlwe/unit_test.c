@@ -147,6 +147,16 @@ void perform_unit_tests()
 			//qsort (small2, M, sizeof (uint16_t), compare_uint16);
 			//qsort (small3, M, sizeof (uint16_t), compare_uint16);
 
+			if (memcompare(small3, small1, M) != 1)
+			{
+				xputs("knuth_yao_asm_shuffle fail");
+				fail = 1;
+				break;
+			}
+
+
+			qsort (small1, M, sizeof (uint16_t), compare_uint16);
+			qsort (small2, M, sizeof (uint16_t), compare_uint16);
 			if (memcompare(small2, small1, M) != 1)
 			{
 				xputs("knuth_yao_small fail");
@@ -154,12 +164,6 @@ void perform_unit_tests()
 				break;
 			}
 
-			if (memcompare(small3, small1, M) != 1)
-			{
-				xputs("knuth_yao_asm_shuffle fail");
-				fail = 1;
-				break;
-			}
 		}
 		if (fail == 1)
 			xputs("BAD!\n");
