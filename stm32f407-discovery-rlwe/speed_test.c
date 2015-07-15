@@ -6,6 +6,7 @@
 #include "core_cm4.h"
 #include "term_io.h"
 #include "knuth_yao_asm.h"
+#include "lwe_arm.h"
 #include "stdlib.h"
 #include "lwe.h"
 
@@ -24,6 +25,7 @@ void speed_test()
 	int i;
 	uint32_t j,num,num1,num2,fail,large1[M],large2[M],large3[M],large4[M],large5[M],large6[M],large_m[M],large_m_asm[M],large_c1[M],large_c2[M],large_c1_asm[M],large_c2_asm[M];
 	uint32_t small1_0[M/2],small1_1[M/2],small2_0[M/2],small2_1[M/2];
+	uint16_t small1[M];
 	uint32_t rnd,rnd_rem,rnd1,rnd2;
 	int num16,num32;
 
@@ -48,6 +50,17 @@ void speed_test()
 		stopTime = DWT->CYCCNT; // Get the stop time
 
 	#ifdef PERFORM_BIG_SPEED_TESTS
+		srand(1000);
+		DWT->CYCCNT=0;
+		startTime = DWT->CYCCNT; // Get the start time
+		for (i=0; i<SPEED_TEST_BIG_LOOPS; i++)
+		{
+			knuth_yao_shuffled_with_asm_optimization(small1);
+		}
+		stopTime = DWT->CYCCNT; // Get the end time
+		xprintf("knuth_yao_shuffled_with_asm_optimization:");
+		printDuration(startTime, stopTime, SPEED_TEST_BIG_LOOPS,offset_cycles);
+
 		srand(1000);
 		DWT->CYCCNT=0;
 		startTime = DWT->CYCCNT; // Get the start time
@@ -102,6 +115,7 @@ void speed_test()
 		stopTime = DWT->CYCCNT; // Get the end time
 		xprintf("knuth_yao_asm:");
 		printDuration(startTime, stopTime, SPEED_TEST_BIG_LOOPS,offset_cycles);
+
 	#endif
 
 	#ifdef PERFORM_MODULO_SPEED_TESTS

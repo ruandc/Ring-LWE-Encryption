@@ -49,97 +49,14 @@ uint32_t TM_RNG_Get(void) {
 
 }
 
-/* This funcion initializes the USART1 peripheral
- * 
- * Arguments: baudrate --> the baudrate at which the USART is 
- * 						   supposed to operate
- */
-/*
-void init_USART1(uint32_t baudrate){
-	
-
-	GPIO_InitTypeDef GPIO_InitStruct; // this is for the GPIO pins used as TX and RX
-	USART_InitTypeDef USART_InitStruct; // this is for the USART1 initilization
-	NVIC_InitTypeDef NVIC_InitStructure; // this is used to configure the NVIC (nested vector interrupt controller)
-	
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-	
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
-
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7; // Pins 6 (TX) and 7 (RX) are used
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF; 			// the pins are configured as alternate function so the USART peripheral has access to them
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;		// this defines the IO speed and has nothing to do with the baudrate!
-	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;			// this defines the output type as push pull mode (as opposed to open drain)
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;			// this activates the pullup resistors on the IO pins
-	GPIO_Init(GPIOB, &GPIO_InitStruct);					// now all the values are passed to the GPIO_Init() function which sets the GPIO registers
-	
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource6, GPIO_AF_USART1); //
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource7, GPIO_AF_USART1);
-	
-	USART_InitStruct.USART_BaudRate = baudrate;				// the baudrate is set to the value we passed into this init function
-	USART_InitStruct.USART_WordLength = USART_WordLength_8b;// we want the data frame size to be 8 bits (standard)
-	USART_InitStruct.USART_StopBits = USART_StopBits_1;		// we want 1 stop bit (standard)
-	USART_InitStruct.USART_Parity = USART_Parity_No;		// we don't want a parity bit (standard)
-	USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // we don't want flow control (standard)
-	USART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx; // we want to enable the transmitter and the receiver
-	USART_Init(USART1, &USART_InitStruct);					// again all the properties are passed to the USART_Init function which takes care of all the bit setting
-	
-	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); // enable the USART1 receive interrupt 
-	
-	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;		 // we want to configure the USART1 interrupts
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;// this sets the priority group of the USART1 interrupts
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;		 // this sets the subpriority inside the group
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			 // the USART1 interrupts are globally enabled
-	NVIC_Init(&NVIC_InitStructure);							 // the properties are passed to the NVIC_Init function which takes care of the low level stuff	
-
-	// finally this enables the complete USART1 peripheral
-	USART_Cmd(USART1, ENABLE);
-}
-*/
-/* This function is used to transmit a string of characters via 
- * the USART specified in USARTx.
- * 
- * It takes two arguments: USARTx --> can be any of the USARTs e.g. USART1, USART2 etc.
- * 						   (volatile) char *s is the string you want to send
- * 
- * Note: The string has to be passed to the function as a pointer because
- * 		 the compiler doesn't know the 'string' data type. In standard
- * 		 C a string is just an array of characters
- * 
- * Note 2: At the moment it takes a volatile char because the received_string variable
- * 		   declared as volatile char --> otherwise the compiler will spit out warnings
- * */
-/*
-
-#define MAX_STRLEN 12 // this is the maximum string length of our string in characters
-volatile char received_string[MAX_STRLEN+1]; // this will hold the recieved string
-
-void USART_puts(USART_TypeDef* USARTx, volatile char *s){
-
-	while(*s){
-		// wait until data register is empty
-		while( !(USARTx->SR & 0x00000040) ); 
-		USART_SendData(USARTx, *s);
-		*s++;
-	}
-}*/
-
 void initAll ()
 {
-	//init_USART1(115200); // initialize USART1 @ 9600 baud
 	comm_init();
 
 	//RNG Peripheral enable
 	RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_RNG, ENABLE);
 	RNG_Cmd(ENABLE);
 }
-
-/*
-#ifdef NTT512
-#else
-uint16_t primrt_inv_omega_table[7] = {7680,3383,5756,1728,7584,6569,6601};
-uint16_t primrt_omega_table_asm[8] = {7680,4298,6468,849,2138,3654,1714,5118};
-#endif*/
 
 void print_array(uint32_t a[])
 {
@@ -155,6 +72,11 @@ int main (void)
 	initAll();
 
 	xprintf("Startup!");
+
+	int i,j;
+	for (i=0; i<10; i++){
+		xprintf("rand:%x\n",get_rand());
+	}
 
 #ifdef GENERATE_ASCII_RANDOM_BITS
 

@@ -10,13 +10,24 @@ uint32_t g_fake_rand;
 #endif
 
 #ifdef USE_FAKE_GET_RAND
-uint32_t get_rand() { return g_fake_rand; }
+	uint32_t get_rand() { return g_fake_rand; }
 #else
-uint32_t get_rand() {
-  uint32_t rnd = rand();
-  rnd |= 0x80000000; // set the least significant bit
-  return rnd;
-}
+	#ifdef USE_TRNG
+	#define GET_TRNG_NUMBER (*(volatile unsigned int *) (RNG_ADDR+8));
+	uint32_t get_rand()
+	{
+	  uint32_t rnd = GET_TRNG_NUMBER;
+	  rnd |= 0x80000000; // set the least significant bit
+	  return rnd;
+	}
+	#else
+		uint32_t get_rand()
+		{
+		  uint32_t rnd = rand();
+		  rnd |= 0x80000000; // set the least significant bit
+		  return rnd;
+		}
+	#endif
 #endif
 
 uint32_t clz(uint32_t a) {
@@ -43,9 +54,11 @@ uint32_t mod(uint32_t x) {
   while (ret2 > MODULUS) {
     ret2 -= MODULUS;
   }
+#ifdef DEBUG_PRINTF
   if (!(ret2 >= 0 && ret2 < MODULUS)) {
     printf("error: %d\n", ret2);
   }
+#endif
   assert(ret2 >= 0 && ret2 < MODULUS);
   return (uint32_t) ret2;
 }
@@ -54,7 +67,7 @@ uint32_t mod(uint32_t x) {
 void knuth_yao2(uint32_t a[M]) {
   int i;
   uint32_t rnd;
-  uint32_t sample_in_table;
+  int sample_in_table;
   rnd = get_rand();
   for (i = 0; i < M / 2; i++) {
 #ifdef DISABLE_KNUTH_YAO
@@ -127,19 +140,18 @@ void knuth_yao_shuffled(uint16_t result[M])
 #endif
   }
 
-/*
+
 	while (counter2>0) {
-		uint32_t rnd = rand()&(M-1);//Random number with mask
-		if (rnd>counter2)
+		uint32_t rnd = get_rand()&(M-1);//Random number with mask
+		if (rnd<(M-counter2))
 		{
 			//Swap
 			sample=result[rnd];
-			result[rnd]=result[counter2];
-			result[counter2]=sample;
+			result[rnd]=result[M-counter2];
+			result[M-counter2]=sample;
 			counter2--;
 		}
 	}
-*/
 }
 
 //#define NEW_RND_BOTTOM 0
@@ -147,8 +159,8 @@ void knuth_yao_shuffled(uint16_t result[M])
 //#define NEW_RND_MID 32-5
 
 #define NEW_RND_BOTTOM 1
-#define NEW_RND_LARGE 32 - 9
-#define NEW_RND_MID 32 - 6
+//#define NEW_RND_LARGE 32 - 9
+//#define NEW_RND_MID 32 - 6
 
 void knuth_yao_smaller_tables2(uint32_t *a) {
   int i;

@@ -4,7 +4,7 @@
 #include "term_io.h"
 #include "stdlib.h"
 #include "knuth_yao_asm.h"
-#include "knuth_yao_asm_shuffle.h"
+#include "lwe_arm.h"
 //#include "knuth_yao_asm_small_tables.h"
 #include "unit_test.h"
 #include "lwe.h"
@@ -141,7 +141,21 @@ void perform_unit_tests()
 			knuth_yao_small(small2);
 
 			srand(i * i);
-			knuth_yao_asm_shuffle(small3);
+			/*
+			int counter2 = knuth_yao_asm_shuffle(small3);
+			//xprintf("counter2=%d\n",counter2);
+			while (counter2<512) {
+				uint32_t rnd = get_rand()&(M-1);//Random number with mask
+				if (rnd<counter2)
+				{
+					//Swapa
+					uint16_t sample=small3[rnd];
+					small3[rnd]=small3[counter2];
+					small3[counter2]=sample;
+					counter2++;
+				}
+			}*/
+			knuth_yao_shuffled_with_asm_optimization(small3);
 
 			//qsort (small1, M, sizeof (uint16_t), compare_uint16);
 			//qsort (small2, M, sizeof (uint16_t), compare_uint16);
@@ -149,11 +163,10 @@ void perform_unit_tests()
 
 			if (memcompare(small3, small1, M) != 1)
 			{
-				xputs("knuth_yao_asm_shuffle fail");
+				xprintf("knuth_yao_asm_shuffle fail i=%d\n",i);
 				fail = 1;
 				break;
 			}
-
 
 			qsort (small1, M, sizeof (uint16_t), compare_uint16);
 			qsort (small2, M, sizeof (uint16_t), compare_uint16);
@@ -170,7 +183,7 @@ void perform_unit_tests()
 		else
 			xputs("OK!\n");
 
-
+		/*
 		xputs("knuth_yao_shuffled2: ");
 		fail = 0;
 		for (i = 0; i < UNIT_TEST_SMALL_LOOPS; i++)
@@ -201,6 +214,7 @@ void perform_unit_tests()
 			xputs("FAIL!\n");
 		else
 			xputs("OK!\n");
+		*/
 
 		xprintf("knuth_yao_asm:");
 		fail=0;

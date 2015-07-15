@@ -62,5 +62,6 @@ void get_ntt_random_numbers(uint32_t *large1, uint32_t *large2, uint32_t i);
 void rearrange_for_final_test(uint32_t in[M], uint32_t out[M]);
 void rearrange(uint32_t a_0[], uint32_t a_1[]);
 void get_rand_input(uint32_t i, uint32_t large1[M], uint32_t large2[M]);
+uint32_t get_rand();
 
 #endif /* LWE_H_ */
