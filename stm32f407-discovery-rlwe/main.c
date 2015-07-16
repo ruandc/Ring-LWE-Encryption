@@ -4,12 +4,11 @@
 #include <stm32f4xx_usart.h>
 #include <stm32f4xx_rcc.h>
 #include <lwe.h>
-#include <test_asm.h>
 #include "global.h"
+#include "lwe_arm.h"
 #include "speed_test.h"
 #include "term_io.h"
 #include "stdlib.h"
-#include "knuth_yao_asm.h"
 #include "unit_test.h"
 
 void Delay(__IO uint32_t nCount) {

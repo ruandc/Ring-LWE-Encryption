@@ -254,14 +254,20 @@ cleanup:
 
 knuth_yao_asm_done:
 
-	add r14,r3,r14,lsl #16 //We combine two results into a single word
+	add r1,#1
+	strh r3,[r11,r1,lsl #1]
 
+/*
+	Old way: Combining the two coefficients into a single word before writing it to memory
+
+	add r14,r3,r14,lsl #16 //We combine two results into a single word
 	//Only write the result to memory if r1 is even
 	lsrs r7,r1,#1
 	it cc
 	strcc r14,[r11,r1,lsl #1]; //Write combined_results (r14) to [r11]
-
 	add r1,#1
+*/
+
 	cmp r1,r12 //cmp r1,#(M-1) //Check if r1==256
 	bne knuth_yao_single //Jump to knuth_yao_single
 

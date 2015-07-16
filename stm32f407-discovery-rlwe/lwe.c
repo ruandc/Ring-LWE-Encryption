@@ -74,8 +74,8 @@ void knuth_yao2(uint32_t a[M]) {
     a[2 * i + 1] = 0;
     a[2 * i] = 0;
 #else
-    a[2 * i + 1] = knuth_yao_single_number(&rnd,&sample_in_table);
     a[2 * i] = knuth_yao_single_number(&rnd,&sample_in_table);
+    a[2 * i + 1] = knuth_yao_single_number(&rnd,&sample_in_table);
 #endif
   }
 }
@@ -84,7 +84,7 @@ void knuth_yao_small(uint16_t a[M])
 {
   int i;
   uint32_t rnd;
-  uint32_t sample_in_table;
+  int sample_in_table;
   rnd = get_rand();
   for (i = 0; i < M / 2; i++) {
 #ifdef DISABLE_KNUTH_YAO

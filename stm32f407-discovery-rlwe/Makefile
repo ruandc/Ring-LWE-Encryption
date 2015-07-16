@@ -36,14 +36,13 @@ AFLAGS	= $(MCFLAGS)
 #-mapcs-float use float regs. small increase in code size
 
 SRC = main.c \
-	lwe_arm.c \
 	stm32f4xx_it.c \
 	system_stm32f4xx.c \
 	lwe.c \
 	knuth_yao_asm.S \
 	knuth_yao_asm_shuffle.S \
-	test_asm.S \
-	test_asm.c \
+	lwe_arm.S \
+	lwe_arm.c \
 	term_io.c \
 	comm.c \
 	speed_test.c \

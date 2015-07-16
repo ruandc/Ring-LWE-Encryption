@@ -5,8 +5,8 @@
  *      Author: rdeclerc
  */
 
-#ifndef TEST_ASM_H_
-#define TEST_ASM_H_
+#ifndef LWE_ARM_H_
+#define LWE_ARM_H_
 
 #include "global.h"
 #include "stdint.h"
@@ -15,6 +15,10 @@
 extern uint32_t fixed_data1[M/2] attribute_fixed_data1;
 extern uint32_t fixed_data2[M/2] attribute_fixed_data1;
 extern uint32_t fixed_data3[M/2] attribute_fixed_data1;
+
+void knuth_yao_shuffled_with_asm_optimization(uint16_t * out);
+int knuth_yao_asm(uint16_t * vals);
+int knuth_yao_asm_shuffle(uint16_t * vals);
 
 void asmtest();
 
@@ -54,4 +58,4 @@ void insert_highval(uint32_t * a, uint32_t b);
 void insert_lowval(uint32_t * a, uint32_t b);
 void ntt_multiply_asm(uint32_t * a, uint32_t * b, uint32_t * c);
 
-#endif /* TEST_ASM_H_ */
+#endif /* LWE_ARM_H_ */

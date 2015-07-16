@@ -1,14 +1,14 @@
+#include "lwe_arm.h"
+
 #include "global.h"
 #include "stdint.h"
-#include "test_asm.h"
-#include "knuth_yao_asm.h"
 #include "stdlib.h"
 #include "string.h"
 
 
 void r1_gen_asm(uint32_t * a)
 {
-	knuth_yao_asm(a);
+	knuth_yao_asm((uint16_t *) a);
 	fwd_ntt_asm(a);
 }
 
@@ -43,9 +43,9 @@ void RLWE_enc_asm(uint32_t * a, uint32_t * c1, uint32_t * c2, uint32_t * m, uint
 	encode_message_asm(encoded_m,m); //for(i=0; i<M/2; i++) m[i] = ((m[i]&0xffff) * QBY2) + ((((m[i]>>16)&0xffff) * QBY2)<<16);
 
 #ifdef USE_PARALLEL
-	knuth_yao_asm(fixed_data1);
-	knuth_yao_asm(fixed_data2);
-	knuth_yao_asm(fixed_data3);
+	knuth_yao_asm((uint16_t *) fixed_data1);
+	knuth_yao_asm((uint16_t *) fixed_data2);
+	knuth_yao_asm((uint16_t *) fixed_data3);
 
 	coefficient_add_asm(fixed_data3, fixed_data3, encoded_m);	// e3 <-- e3 + m
 
@@ -183,4 +183,21 @@ void ntt_multiply_asm(uint32_t * a, uint32_t * b, uint32_t * c)
 	rearrange2(large2);
 	inv_ntt2(large2);
 	*/
+}
+
+void knuth_yao_shuffled_with_asm_optimization(uint16_t * out)
+{
+	int counter2 = knuth_yao_asm_shuffle(out);
+	//xprintf("counter2=%d\n",counter2);
+	while (counter2<M) {
+		uint32_t rnd = get_rand()&(M-1);//Random number with mask
+		if (rnd<counter2)
+		{
+			//Swapa
+			uint16_t sample=out[rnd];
+			out[rnd]=out[counter2];
+			out[counter2]=sample;
+			counter2++;
+		}
+	}
 }
