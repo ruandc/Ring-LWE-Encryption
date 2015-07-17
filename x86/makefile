@@ -1,16 +1,13 @@
 CC=gcc
 
-CFLAGS= -g -O0  -Wall
+CFLAGS= -g -O0
 
 
 LDFLAGS=
 
-#SOURCES=LWE2.c
-
 SOURCES=main.c \
-		unit_test.c \
-		lwe.c \
-		files.c
+	lwe.c \
+	lwe_original.c
 		
 OBJECTS1=$(SOURCES:.S=.o)
 OBJECTS2=$(OBJECTS1:.s=.o)
@@ -26,6 +23,6 @@ disassemble:
 	$(OBJDUMP) -S --disassemble -D $(EXECUTABLE) > $(EXECUTABLE).dump
 
 clean:
-	$(RM) $(EXECUTABLE) *.o
+	$(RM) $(EXECUTABLE) *.o perf1.dsu
 
 
