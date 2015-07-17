@@ -1,18 +1,22 @@
 TARGET=main.hex
 EXECUTABLE=main.elf
 BINTARGET=main.bin
+TOOLCHAIN_PATH=~/localdisk/toolchains/gcc-arm-none-eabi-4_8-2014q2/bin
+STFLASH=/users/cosic/rdeclerc/localdisk/toolchains/stlink/install/bin/st-flash
+STUTIL=/users/cosic/rdeclerc/localdisk/toolchains/stlink/install/bin/st-util
 
-CC=arm-none-eabi-gcc
-LD=arm-none-eabi-gcc
-AR=arm-none-eabi-ar
-AS=arm-none-eabi-as
-CP=arm-none-eabi-objcopy
-OD=arm-none-eabi-objdump
+
+CC=${TOOLCHAIN_PATH}/arm-none-eabi-gcc
+LD=${TOOLCHAIN_PATH}/arm-none-eabi-gcc
+AR=${TOOLCHAIN_PATH}/arm-none-eabi-ar
+AS=${TOOLCHAIN_PATH}/arm-none-eabi-as
+CP=${TOOLCHAIN_PATH}/arm-none-eabi-objcopy
+OD=${TOOLCHAIN_PATH}/arm-none-eabi-objdump
 
 BIN=$(CP) -O ihex
 
 STD_PERIPH=/users/cosic/rdeclerc/templates/STM32F4-workarea/Libraries/STM32F4xx_StdPeriph_Driver
-#STD_PERIPH=/home/rdeclerc/templates/STM32F4-workarea/Libraries/STM32F4xx_StdPeriph_Driver
+#STD_PERIPH=/home/rdeclerc/templates/STM32F4-workarea/Libraries/STM32F4xx_StdPeriph_Driver-g
 CMSIS=/users/cosic/rdeclerc/templates/STM32F4-workarea/Libraries/CMSIS
 #CMSIS=/home/rdeclerc/templates/STM32F4-workarea/Libraries/CMSIS
 
@@ -20,7 +24,7 @@ DEFS = -DUSE_STDPERIPH_DRIVER -DSTM32F4XX -DHSE_VALUE=8000000
 STARTUP = ./startup_stm32f40xx.s
 
 MCU = cortex-m4
-MCFLAGS = -mcpu=$(MCU) -mthumb -mlittle-endian -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb-interwork -std=c99 -g2
+MCFLAGS = -mcpu=$(MCU) -mthumb -mlittle-endian -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb-interwork -std=c99 -g3 -Wunused
 STM32_INCLUDES = -I$(CMSIS)/Device/ST/STM32F4xx/Include/ \
 	-I$(CMSIS)/Include/ \
 	-I$(STD_PERIPH)/inc
@@ -36,9 +40,9 @@ SRC = main.c \
 	system_stm32f4xx.c \
 	lwe.c \
 	knuth_yao_asm.S \
-	knuth_yao_asm_small_tables.S \
-	test_asm.S \
-	test_asm.c \
+	knuth_yao_asm_shuffle.S \
+	lwe_arm.S \
+	lwe_arm.c \
 	term_io.c \
 	comm.c \
 	speed_test.c \
@@ -98,7 +102,7 @@ clean:
 	rm -f main.elf main.hex main.elf.dump main.bin
 
 program: $(BINTARGET)
-	st-flash --reset write $(BINTARGET) 0x8000000
+	${STFLASH} --reset write $(BINTARGET) 0x8000000
 	
 disassemble: $(TARGET)
 	arm-none-eabi-objdump $(EXECUTABLE) --disassemble > $(EXECUTABLE).dump
@@ -106,10 +110,10 @@ disassemble: $(TARGET)
 uart:
 	make clean
 	make program
-	screen /dev/ttyUSB0 115200
+	screen /dev/ttyUSB0 9600
 
 acm0:
-	screen /dev/ttyACM0 115200
+	screen /dev/ttyACM0 9600
 	
 gdb-server:
-	st-util
+	${STUTIL}

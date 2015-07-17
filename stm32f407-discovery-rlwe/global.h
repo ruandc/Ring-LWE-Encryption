@@ -20,25 +20,26 @@
  *inherent with the unpadded Ring-LWE encryption scheme */
 //#define PERFORM_DECRYPTION_ERROR_TEST
 
-#define PERFORM_UNIT_TESTS
+//#define PERFORM_UNIT_TESTS
 #define PERFORM_UNIT_TESTS_BIG
 #define PERFORM_UNIT_TESTS_SMALL
 
+#define PERFORM_SPEED_TESTS
+#define PERFORM_BIG_SPEED_TESTS
+#define PERFORM_SMALL_SPEED_TESTS
 
-//#define PERFORM_SPEED_TESTS
-//#define PERFORM_BIG_SPEED_TESTS
-//#define PERFORM_SMALL_SPEED_TESTS
-
-
-#define UNIT_TEST_BIG_LOOPS 100
-#define UNIT_TEST_SMALL_LOOPS 10000
-#define SPEED_TEST_BIG_LOOPS 10000
+#define UNIT_TEST_BIG_LOOPS 10
+#define UNIT_TEST_SMALL_LOOPS 10
+#define SPEED_TEST_BIG_LOOPS 100000
 #define SPEED_TEST_SMALL_LOOPS 10000
 
-#define USE_SMALL_TABLES
+//#define USE_SMALL_TABLES
+
+//Provides protection against simple power analysis
+#define USE_KNUTH_YAO_SHUFFLE
 
 #define NTT512
-//#define KNUTH_YAO_512
+#define KNUTH_YAO_512
 
 #ifdef KNUTH_YAO_512
 	#ifdef USE_SMALL_TABLES
@@ -107,7 +108,7 @@
 #endif
 
 
-//#define USE_TRNG
+#define USE_TRNG
 #define RNG_ADDR 0x50060800
 
 /*

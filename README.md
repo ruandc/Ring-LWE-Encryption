@@ -1,8 +1,8 @@
-Public-Key Cryptography with Ring-LWE Encryption
+Library for Public-Key Cryptography with Ring-LWE Encryption
 ========
-This project performs public-key cryptography that is post-quantum secure. Public-key crypto uses two keys, one public and one private, that are mathematically linked. The public key can be used to encrypt a plaintext message, after which the encrypted message can be decrypted by the private key.
+This project contains a library to perform public-key cryptography that is post-quantum secure. Public-key crypto uses two keys, one public and one private, that are mathematically linked. The public key can be used to encrypt a plaintext message, after which the encrypted message can be decrypted by the private key.
 
-The underlying security is based on the Ring-LWE problem. It is capable of providing either 128-bit security or 256-bit security. Recent advances in post-quantum cryptography has highlighted the efficiency of using these schemes. This project aims to provide a working example of the underlying principles of Ring-LWE cryptography, and also to demonstrate how to make efficient implementations for this scheme.
+The underlying security of the scheme is based on the Ring-LWE problem. The library is capable of providing either 128-bit security or 256-bit security. Recent advances in post-quantum cryptography has highlighted the efficiency of using these schemes. This project aims to provide a working example of the underlying principles of Ring-LWE cryptography, and also to demonstrate how to make efficient implementations for this scheme.
 
 Post-Quantum Cryptography
 =========
@@ -34,6 +34,10 @@ This project supports two security parameter sets:
 	<td>12.18/sqrrt(2*pi)</td>
     </tr>
 </table>
+
+How to use this library
+==========
+Two different libraries are provided in this project. The first is a basic version for the x86 architecture.
 
 Further Reading
 ==========
