@@ -72,10 +72,6 @@ int main (void)
 
 	xprintf("Startup!");
 
-	int i,j;
-	for (i=0; i<10; i++){
-		xprintf("rand:%x\n",get_rand());
-	}
 
 #ifdef GENERATE_ASCII_RANDOM_BITS
 

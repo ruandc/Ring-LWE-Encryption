@@ -28,10 +28,10 @@ uint32_t mod_asm(uint32_t a);
 uint32_t smod_asm(uint32_t a);
 uint32_t umod_asm_simd(uint32_t a);
 
-void coefficient_add_asm(uint32_t * a, uint32_t * b, uint32_t * c);
+void coefficient_add_asm(uint16_t * a, uint16_t * b, uint16_t * c);
 void coefficient_mul_asm(uint32_t * a, uint32_t * b, uint32_t * c);
 void coefficient_sub_asm(uint32_t * a, uint32_t * b, uint32_t * c);
-void coefficient_mul_add_asm(uint32_t * result, uint32_t * large1, uint32_t * large2, uint32_t * large3);
+void coefficient_mul_add_asm(uint16_t * result, uint16_t * large1, uint16_t * large2, uint16_t * large3);
 
 void a_gen_asm(uint32_t * a);
 void r1_gen_asm(uint32_t * a);

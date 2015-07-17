@@ -26,10 +26,8 @@ void key_gen_asm(uint32_t * large1, uint32_t * large2, uint32_t * large3)
 
 void RLWE_dec_asm(uint32_t * c1, uint32_t * c2, uint32_t * r2)
 {
-	//coefficient_mul_asm(c1,c1,r2); //coefficient_mul2(c1, c1, r2);	// c1 <-- c1*r2
-	//coefficient_add_asm(c1,c1,c2); //coefficient_add2(c1, c1, c2);	// c1 <-- c1*r2 + c2
-
-	coefficient_mul_add_asm(c1,c1,r2,c2);
+	// c1 <-- c1*r2 + c2
+	coefficient_mul_add_asm((uint16_t *)c1,(uint16_t *)c1,(uint16_t *)r2,(uint16_t *)c2);
 
 	inv_ntt_asm(c1); //inv_ntt2(c1);
 }
@@ -47,17 +45,15 @@ void RLWE_enc_asm(uint32_t * a, uint32_t * c1, uint32_t * c2, uint32_t * m, uint
 	knuth_yao_asm((uint16_t *) fixed_data2);
 	knuth_yao_asm((uint16_t *) fixed_data3);
 
-	coefficient_add_asm(fixed_data3, fixed_data3, encoded_m);	// e3 <-- e3 + m
+	coefficient_add_asm((uint16_t *)fixed_data3, (uint16_t *)fixed_data3, (uint16_t *)encoded_m);	// e3 <-- e3 + m
 
 	fwd_ntt_parallel_asm(fixed_data1); //Uses fixed_data1+fixed_data2+fixed_data3. It knows that there is an offset of 0x200 between each consecutive item
 
-	// m <-- a*e1
-	//coefficient_mul_asm(tmp_m,a,fixed_data1); 		//tmp_m <-- a*e1
-	//coefficient_add_asm(c1, fixed_data2, tmp_m);	//c1 <-- e2 <-- e2 + a*e1(tmp_m);
-	coefficient_mul_add_asm(c1,a,fixed_data1,fixed_data2);
-	//coefficient_mul_asm(tmp_m,p,fixed_data1); 		//tmp_m <-- p*e1
-	//coefficient_add_asm(c2, fixed_data3, tmp_m);	//c2 <-- e3 + p*e1
-	coefficient_mul_add_asm(c2,p,fixed_data1,fixed_data3);
+	// m (c1) <-- e2 + a*e1
+	coefficient_mul_add_asm((uint16_t *)c1,(uint16_t *)a,(uint16_t *)fixed_data1,(uint16_t *)fixed_data2);
+
+	//c2 <-- e3 + p*e1
+	coefficient_mul_add_asm((uint16_t *)c2,(uint16_t *)p,(uint16_t *)fixed_data1,(uint16_t *)fixed_data3);
 
 #else
 	uint32_t e1[M], e2[M], e3[M], tmp_m[M/2];;
@@ -65,14 +61,14 @@ void RLWE_enc_asm(uint32_t * a, uint32_t * c1, uint32_t * c2, uint32_t * m, uint
 	knuth_yao_asm(e2);
 	knuth_yao_asm(e3);
 
-	coefficient_add_asm(e3, e3, encoded_m);	// e3 <-- e3 + m
+	coefficient_add_asm((uint16_t *)e3, (uint16_t *)e3, (uint16_t *)encoded_m);	// e3 <-- e3 + m
 
 	fwd_ntt_asm(e1);
 	fwd_ntt_asm(e2);
 	fwd_ntt_asm(e3);
 
 	coefficient_mul_asm(tmp_m,a,e1); 		//tmp_m <-- a*e1
-	coefficient_add_asm(c1, e2, tmp_m);	// c1 <-- e2 <-- e2 + a*e1(tmp_m);
+	coefficient_add_asm((uint16_t *)c1, (uint16_t *)e2, (uint16_t *)tmp_m);	// c1 <-- e2 <-- e2 + a*e1(tmp_m);
 	coefficient_mul_asm(tmp_m,p,e1); 		// tmp_mm <-- p*e1
 	coefficient_add_asm(c2, e3, tmp_m);	// c2< <-- e3 <-- e3 + p*e1
 #endif
@@ -94,19 +90,7 @@ void message_gen_asm(uint32_t * m)
 void rearrange_for_final_test_asm(uint32_t in[M/2],uint32_t out[M/2])
 {
 	int i;
-	/*
-	for (i=0; i<M/2; i+=2)
-	{
-		out[i]=in[2*i];
-		out[i+1]=in[2*(i+1)];
-	}
 
-	for (i=0; i<M/2; i+=2)
-	{
-		out[i+M/2]=in[2*i+1];
-		out[i+1+M/2]=in[2*(i+1)+1];
-	}
-	*/
 	for (i=0; i<M/2; i+=2)
 	{
 		out[i/2]=(in[i]&0xffff)+((in[i+1]&0xffff)<<16);
@@ -178,11 +162,6 @@ void ntt_multiply_asm(uint32_t * a, uint32_t * b, uint32_t * c)
 	coefficient_mul_asm(c,a,b);
 	rearrange_asm(c);
 	inv_ntt_asm(c);
-/*
-	fwd_ntt2(large2);
-	rearrange2(large2);
-	inv_ntt2(large2);
-	*/
 }
 
 void knuth_yao_shuffled_with_asm_optimization(uint16_t * out)
@@ -193,7 +172,7 @@ void knuth_yao_shuffled_with_asm_optimization(uint16_t * out)
 		uint32_t rnd = get_rand()&(M-1);//Random number with mask
 		if (rnd<counter2)
 		{
-			//Swapa
+			//Swap
 			uint16_t sample=out[rnd];
 			out[rnd]=out[counter2];
 			out[counter2]=sample;

@@ -254,7 +254,7 @@ void perform_unit_tests()
 				small2_1[j]=rnd2;
 			}
 
-			coefficient_add_asm(large1,large1,large2);
+			coefficient_add_asm((uint16_t *)large1,(uint16_t *)large1,(uint16_t *)large2);
 			coefficient_add(small1_0,small1_1,small2_0,small2_1);
 
 			if (!compare_simd(small1_0,small1_1,large1))
@@ -280,7 +280,7 @@ void perform_unit_tests()
 			get_ntt_random_numbers(large2_asm,large2,i+1);
 			get_ntt_random_numbers(large3_asm,large3,i+2);
 
-			coefficient_mul_add_asm(res_asm,large1_asm,large2_asm,large3_asm);
+			coefficient_mul_add_asm((uint16_t *)res_asm,(uint16_t *)large1_asm,(uint16_t *)large2_asm,(uint16_t *)large3_asm);
 
 			coefficient_mul_add2(res,large1,large2,large3);
 

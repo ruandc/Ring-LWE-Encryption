@@ -75,7 +75,7 @@ void knuth_yao2(uint32_t a[M]) {
     a[2 * i] = 0;
 #else
     a[2 * i] = knuth_yao_single_number(&rnd,&sample_in_table);
-    a[2 * i + 1] = knuth_yao_single_number(&rnd,&sample_in_table);
+    a[2 * i+1] = knuth_yao_single_number(&rnd,&sample_in_table);
 #endif
   }
 }
