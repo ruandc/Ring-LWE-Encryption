@@ -64,7 +64,7 @@ uint32_t mod(uint32_t x) {
 }
 
 
-void knuth_yao2(uint32_t a[M]) {
+void knuth_yao2(uint16_t a[M]) {
   int i;
   uint32_t rnd;
   int sample_in_table;
@@ -452,7 +452,7 @@ void knuth_yao2_optimized( int a[M])
         }
 }*/
 
-void a_gen2(uint32_t a[]) {
+void a_gen2(uint16_t a[]) {
   uint32_t i, r;
 
   for (i = 0; i < M / 2; i++) {
@@ -464,17 +464,16 @@ void a_gen2(uint32_t a[]) {
   fwd_ntt2(a);
 }
 
-void r1_gen2(uint32_t r1[]) {
+void r1_gen2(uint16_t r1[]) {
   knuth_yao2(r1);
   fwd_ntt2(r1);
 }
 
-void r2_gen2(uint32_t r2[M]) {
+void r2_gen2(uint16_t r2[M]) {
   uint32_t i, j, r, bit, sign;
 
   for (i = 0; i < M;) {
-    r = (uint32_t)
-        rand(); // NB: Need to ensure that this is a good source of entropy
+    r = (uint32_t) rand(); // NB: Need to ensure that this is a good source of entropy
 
     for (j = 0; j < 16; j++) {
       bit = r & 1;
@@ -509,7 +508,7 @@ void r2_gen2(uint32_t r2[M]) {
 }
  */
 
-void rearrange2(uint32_t a[M]) {
+void rearrange2(uint16_t a[M]) {
   uint32_t i;
   uint32_t bit1, bit2, bit3, bit4, bit5, bit6, bit7;
   uint32_t swp_index;
@@ -559,7 +558,7 @@ bool compare_vectors(uint32_t *a, uint32_t *b) {
   ;
 }
 
-void bitreverse2(uint32_t a[M]) {
+void bitreverse2(uint16_t a[M]) {
   uint32_t i, swp_index;
   uint32_t bit1, bit2, bit3, bit4, bit5, bit6, bit7, bit8;
   uint32_t q1, r1, q2, r2;
@@ -609,7 +608,7 @@ void bitreverse2(uint32_t a[M]) {
   }
 }
 
-void fwd_ntt2(uint32_t a[]) {
+void fwd_ntt2(uint16_t a[]) {
   int i, j, k, m;
   uint32_t u1, t1, u2, t2;
   uint32_t primrt, omega;
@@ -674,10 +673,10 @@ void fwd_ntt2(uint32_t a[]) {
     t1 = omega * a[2 * j + 1];
     t1 = mod(t1);
     u1 = a[2 * j];
-    a[2 * j] = u1 + t1;
-    a[2 * j] = mod(a[2 * j]);
-    a[2 * j + 1] = u1 - t1;
-    a[2 * j + 1] = mod(a[2 * j + 1]);
+    a[2 * j] = mod(u1 + t1);
+    //a[2 * j] = mod(a[2 * j]);
+    a[2 * j + 1] = mod(u1 - t1);
+    //a[2 * j + 1] = mod(a[2 * j + 1]);
 
     omega = omega * primrt;
     omega = mod(omega);
@@ -716,7 +715,7 @@ void rearrange(uint32_t a_0[], uint32_t a_1[]) {
   }
 }
 
-void inv_ntt2(uint32_t a[M]) {
+void inv_ntt2(uint16_t a[M]) {
   int j, k, m;
   uint32_t u1, t1, u2, t2;
   uint32_t primrt, omega;
@@ -786,15 +785,15 @@ void inv_ntt2(uint32_t a[M]) {
         t2 = mod(t2);
         u2 = a[2 * (k + j + m / 2)];
 
-        a[2 * (k + j)] = u1 + t1;
-        a[2 * (k + j)] = mod(a[2 * (k + j)]);
-        a[2 * (k + j + m / 2)] = u1 - t1;
-        a[2 * (k + j + m / 2)] = mod(a[2 * (k + j + m / 2)]);
+        a[2 * (k + j)] = mod(u1 + t1);
+        //a[2 * (k + j)] = mod(a[2 * (k + j)]);
+        a[2 * (k + j + m / 2)] = mod(u1 - t1);
+        //a[2 * (k + j + m / 2)] = mod(a[2 * (k + j + m / 2)]);
 
-        a[2 * (k + j) + 1] = u2 + t2;
-        a[2 * (k + j) + 1] = mod(a[2 * (k + j) + 1]);
-        a[2 * (k + j + m / 2) + 1] = u2 - t2;
-        a[2 * (k + j + m / 2) + 1] = mod(a[2 * (k + j + m / 2) + 1]);
+        a[2 * (k + j) + 1] = mod(u2 + t2);
+        //a[2 * (k + j) + 1] = mod(a[2 * (k + j) + 1]);
+        a[2 * (k + j + m / 2) + 1] = mod(u2 - t2);
+        //a[2 * (k + j + m / 2) + 1] = mod(a[2 * (k + j + m / 2) + 1]);
       }
       omega = omega * primrt;
       omega = mod(omega);
@@ -809,10 +808,10 @@ void inv_ntt2(uint32_t a[M]) {
     t1 = omega * a[j];
     t1 = mod(t1);
 
-    a[j - 1] = u1 + t1;
-    a[j - 1] = mod(a[j - 1]);
-    a[j] = u1 - t1;
-    a[j] = mod(a[j]);
+    a[j - 1] = mod(u1 + t1);
+    //a[j - 1] = mod(a[j - 1]);
+    a[j] = mod(u1 - t1);
+    //a[j] = mod(a[j]);
     j++;
 
     omega = omega * primrt;
@@ -823,18 +822,18 @@ void inv_ntt2(uint32_t a[M]) {
   omega = 1;
 
   for (j = 0; j < M;) {
-    a[j] = omega * a[j];
-    a[j] = mod(a[j]);
+    a[j] = mod(omega * a[j]);
+    //a[j] = mod(a[j]);
 
-    a[j] = a[j] * SCALING;
-    a[j] = mod(a[j]);
+    a[j] = mod(a[j] * SCALING);
+    //a[j] = mod(a[j]);
 
     j++;
-    a[j] = omega2 * a[j];
-    a[j] = mod(a[j]);
+    a[j] = mod(omega2 * a[j]);
+    //a[j] = mod(a[j]);
 
-    a[j] = a[j] * SCALING;
-    a[j] = mod(a[j]);
+    a[j] = mod(a[j] * SCALING);
+    //a[j] = mod(a[j]);
     j++;
 
     omega = omega * primrt;
@@ -919,53 +918,50 @@ uint32_t compare_large_simd(uint32_t large_simd[M / 2], uint32_t large[M]) {
   return 1;
 }
 
-void coefficient_mul2(uint32_t a[M], uint32_t b[], uint32_t c[]) {
+void coefficient_mul2(uint16_t out[M], uint16_t b[], uint16_t c[]) {
   // a = b * c
   int j;
 
   for (j = 0; j < M; j++) {
-    a[j] = b[j] * c[j];
-    a[j] = mod(a[j]);
+    out[j] = mod(b[j] * c[j]);
   }
 }
 
-void coefficient_add2(uint32_t a[M], uint32_t b[M], uint32_t c[M]) {
+void coefficient_add2(uint16_t out[M], uint16_t b[M], uint16_t c[M])
+{
   // a = b + c
   int j;
 
   for (j = 0; j < M; j++) {
-    a[j] = b[j] + c[j];
-    a[j] = mod(a[j]);
+	  out[j] = mod(b[j] + c[j]);
   }
 }
 
-void coefficient_mul_add2(uint32_t *result, uint32_t *large1, uint32_t *large2,
-                          uint32_t *large3) {
+void coefficient_mul_add2(uint16_t *result, uint16_t *large1, uint16_t *large2,	uint16_t *large3) {
   // result=large1*large2+large3
   int j;
+  uint32_t tmp;
 
   for (j = 0; j < M; j++) {
-    result[j] = large1[j] * large2[j];
-    result[j] = result[j] + large3[j];
-    result[j] = mod(result[j]);
+	tmp = large1[j] * large2[j];
+    result[j] = mod(tmp + (uint32_t)large3[j]);
   }
 }
 
-void coefficient_sub2(uint32_t result[M], uint32_t b[M], uint32_t c[M]) {
+void coefficient_sub2(uint16_t result[M], uint16_t b[M], uint16_t c[M]) {
   int j;
 
   for (j = 0; j < M; j++) {
-    result[j] = b[j] - c[j];
-    result[j] = mod(result[j]);
+    result[j] = mod(b[j] - c[j]);
   }
 }
 
-void key_gen2(uint32_t a[M], uint32_t p[M], uint32_t r2[M]) {
+void key_gen2(uint16_t a[M], uint16_t p[M], uint16_t r2[M]) {
   a_gen2(a);
   r1_gen2(p);
   r2_gen2(r2);
 
-  uint32_t tmp_a[M];
+  uint16_t tmp_a[M];
 
   // a = a*r2
   coefficient_mul2(tmp_a, a, r2);
@@ -975,11 +971,11 @@ void key_gen2(uint32_t a[M], uint32_t p[M], uint32_t r2[M]) {
   rearrange2(r2);
 }
 
-void RLWE_enc2(uint32_t a[M], uint32_t c1[M], uint32_t c2[M], uint32_t m[M],
-               uint32_t p[M]) {
+void RLWE_enc2(uint16_t a[M], uint16_t c1[M], uint16_t c2[M], uint16_t m[M], uint16_t p[M])
+{
   int i;
-  uint32_t e1[M], e2[M], e3[M];
-  uint32_t encoded_m[M];
+  uint16_t e1[M], e2[M], e3[M];
+  uint16_t encoded_m[M];
   for (i = 0; i < M; i++) {
     encoded_m[i] = m[i] * QBY2; // encoding of message
   }
@@ -1004,18 +1000,50 @@ void RLWE_enc2(uint32_t a[M], uint32_t c1[M], uint32_t c2[M], uint32_t m[M],
   rearrange2(c2);
 }
 
-void RLWE_dec2(uint32_t c1[M], uint32_t c2[M], uint32_t r2[M]) {
+void RLWE_dec2(uint16_t c1[M], uint16_t c2[M], uint16_t r2[M])
+{
   coefficient_mul2(c1, c1, r2); // c1 <-- c1*r2
   coefficient_add2(c1, c1, c2); // c1 <-- c1*r2 + c2
 
   inv_ntt2(c1);
 }
 
-void message_gen2(uint32_t m[M]) {
+void message_gen2(uint16_t m[M]) {
   int i;
   for (i = 0; i < M; i++) {
     m[i] = get_rand() % 2;
   }
+}
+
+void get_small_ntt_random_numbers(uint16_t *small1, uint16_t *small2, uint32_t i)
+{
+  uint32_t j;
+  uint32_t rnd1, rnd2;
+
+  srand(i);
+  /*
+  if (i == 0) {
+	for (j = 0; j < M / 2; j++) {
+	  rnd1 = j + 1;
+	  rnd2 = j + 2;
+	  small1[2*j] = (rnd1 & 0xffff);
+	  small1[2*j+1] =  + (rnd2 & 0xffff);
+	  small2[2 * j] = rnd1;
+	  small2[2 * j + 1] = rnd2;
+	}
+  } else {
+
+  }
+  */
+	for (j = 0; j < M / 2; j++) {
+	  rnd1 = get_rand() & 0x1FFF;
+	  rnd2 = get_rand() & 0x1FFF;
+	  small1[2*j] = mod(rnd1);
+	  small1[2*j+1] = mod(rnd2);
+	  small2[2 * j] = mod(rnd1);
+	  small2[2 * j + 1] = mod(rnd2);
+	}
+  //}
 }
 
 void get_ntt_random_numbers(uint32_t *large1, uint32_t *large2, uint32_t i) {
@@ -1042,7 +1070,8 @@ void get_ntt_random_numbers(uint32_t *large1, uint32_t *large2, uint32_t i) {
   }
 }
 
-void rearrange_for_final_test(uint32_t in[M], uint32_t out[M]) {
+void rearrange_for_final_test(uint16_t in[M], uint16_t out[M])
+{
   int i;
   for (i = 0; i < M / 2; i += 2) {
     out[i] = in[2 * i];

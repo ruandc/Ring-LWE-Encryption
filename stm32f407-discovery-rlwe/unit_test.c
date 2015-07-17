@@ -49,6 +49,7 @@ void perform_unit_tests()
 	uint32_t j,num,num1,num2,fail,large1[M],large2[M],large3[M],large4[M],large5[M],large6[M],large_m[M],large_m_asm[M/2],large_c1[M],large_c2[M],large_c1_asm[M/2],large_c2_asm[M/2],large_a[M],large_p[M],large_r2[M];
 	uint32_t small1_0[M/2],small1_1[M/2],small2_0[M/2],small2_1[M/2];
 	uint32_t rnd,rnd_rem,rnd1,rnd2;
+	uint16_t small1[M], small2[M], small3[M];
 	int num16,num32;
 
 	// Clear up terminal
@@ -123,12 +124,10 @@ void perform_unit_tests()
 
 		xputs("knuth_yao_shuffled: ");
 		fail = 0;
-		for (i = 5; i < UNIT_TEST_SMALL_LOOPS; i++)
+		for (i = 0; i < UNIT_TEST_SMALL_LOOPS; i++)
 		{
 			if ((i%100)==0)
 				xprintf(".");
-
-			uint16_t small1[M], small2[M], small3[M];
 
 			// Test knuth-yao
 			srand(i * i);
@@ -166,38 +165,7 @@ void perform_unit_tests()
 		else
 			xputs("OK!\n");
 
-		/*
-		xputs("knuth_yao_shuffled2: ");
-		fail = 0;
-		for (i = 0; i < UNIT_TEST_SMALL_LOOPS; i++)
-		{
-			if ((i%100)==0)
-				xprintf(".");
-		  // Test knuth-yao
-		  srand(i * i);
-		  knuth_yao_asm_shuffle(large1);
 
-		  srand(i * i);
-		  knuth_yao2(large2);
-
-		  //Sort large1 & large2 and check if they are equivalent
-		  //qsort (large1, M, sizeof (uint16_t), (__compar_fn_t)compare_uint16);
-		  //qsort (large2, M, sizeof (uint16_t), (__compar_fn_t)compare_uint16);
-
-		  uint16_t small[M];
-		  convert_to_uint16_t_array(large2,small);
-		  if (memcompare(small, (uint16_t*)large1, M/2) == 0)
-		  //if (!compare_large_simd2(large1,large2))
-		  {
-			  fail = 1;
-			  break;
-		  }
-		}
-		if (fail == 1)
-			xputs("FAIL!\n");
-		else
-			xputs("OK!\n");
-		*/
 
 		xprintf("knuth_yao_asm:");
 		fail=0;
@@ -206,16 +174,19 @@ void perform_unit_tests()
 			if ((i%100)==0)
 				xprintf(".");
 			srand(i);
-			knuth_yao_asm((uint16_t *) large1);
+			//knuth_yao_asm((uint16_t *) large1);
+			knuth_yao_asm(small1);
 
 			srand(i);
-			knuth_yao2(large2);
+			//knuth_yao2(large2);
+			knuth_yao2(small2);
 
-			if (!compare_large_simd(large1,large2))
+			//if (!compare_large_simd(large1,large2))
+			if (memcompare(small2, small1, M) != 1)
 			{
 				xprintf("i=%d \n",i);
 				fail=1;
-				//break;
+				break;
 			}
 		}
 		if (fail==1)
@@ -227,37 +198,45 @@ void perform_unit_tests()
 			xprintf("OK\n");
 		}
 
+		//r2_gen2
+		fail = 0;
+		xprintf("r2_gen_asm: ");
+		for (i=0; i<UNIT_TEST_SMALL_LOOPS; i++)
+		{
+			//Test knuth-yao
+			srand(i);
+			r2_gen_asm(small1);
 
+			srand(i);
+			r2_gen2(small2);
+
+			//if (!compare_large_simd(large1,large2))
+			if (memcompare(small1, small2, M) != 1)
+			{
+				fail=1;
+				break;
+			}
+		}
+		if (fail==1)
+			xprintf("BAD: i=%d\n",i);
+		else
+			xprintf("OK\n");
 
 
 		xputs("coefficient_add_asm:");
 		fail=0;
-		for (i=0; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
+		for (i=1; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
 		{
+			uint16_t small1_asm[M],small2_asm[M],res_asm[M],res[M];
+
 			srand(i);
-			for (j=0; j<M/2; j++)
-			{
-				rnd1=rand()&COEFFICIENT_ALL_ONES;
-				rnd2=rand()&COEFFICIENT_ALL_ONES;
-				rnd1=j+0xFFF;
-				rnd2=j+1+0xFFF;
-				large1[j]=(rnd1&0xffff)+((rnd2&0xffff)<<16);
-				small1_0[j]=rnd1;
-				small1_1[j]=rnd2;
+			get_small_ntt_random_numbers(small1_asm,small1,i*2);
+			get_small_ntt_random_numbers(small2_asm,small2,i*2+1);
 
-				rnd1=rand();
-				rnd2=rand();
-				rnd1=j+0xFFF;
-				rnd2=j+1+0xFFF;
-				large2[j]=(rnd1&0xffff)+((rnd2&0xffff)<<16);
-				small2_0[j]=rnd1;
-				small2_1[j]=rnd2;
-			}
+			coefficient_add_asm(res_asm,small1,small2);
+			coefficient_add2(res,small1,small2);
 
-			coefficient_add_asm((uint16_t *)large1,(uint16_t *)large1,(uint16_t *)large2);
-			coefficient_add(small1_0,small1_1,small2_0,small2_1);
-
-			if (!compare_simd(small1_0,small1_1,large1))
+			if (memcompare(res_asm, res, M) != 1)
 			{
 				fail=1;
 				break;
@@ -272,20 +251,19 @@ void perform_unit_tests()
 		fail=0;
 		for (i=0; i<UNIT_TEST_SMALL_LOOPS; i++)
 		{
-			uint32_t large1[M],large2[M],large3[M],large1_asm[M/2],large2_asm[M/2],large3_asm[M/2],res[M],res_asm[M/2];
-			//Test knuth-yao
+			uint16_t small1_asm[M],small2_asm[M],small3_asm[M],res_asm[M],res[M];
+
 			srand(i);
 			int j;
-			get_ntt_random_numbers(large1_asm,large1,i);
-			get_ntt_random_numbers(large2_asm,large2,i+1);
-			get_ntt_random_numbers(large3_asm,large3,i+2);
+			get_small_ntt_random_numbers(small1_asm,small1,i);
+			get_small_ntt_random_numbers(small2_asm,small2,i+1);
+			get_small_ntt_random_numbers(small3_asm,small3,i+2);
 
-			coefficient_mul_add_asm((uint16_t *)res_asm,(uint16_t *)large1_asm,(uint16_t *)large2_asm,(uint16_t *)large3_asm);
+			coefficient_mul_add_asm((uint16_t *)res_asm,(uint16_t *)small1_asm,(uint16_t *)small2_asm,(uint16_t *)small3_asm);
 
-			coefficient_mul_add2(res,large1,large2,large3);
+			coefficient_mul_add2(res,small1,small2,small3);
 
-			//if ((!compare(a_0,b_0)) || (!compare(a_1,b_1)))
-			if (!compare_large_simd(res_asm,res))
+			if (memcompare(res_asm, res, M) != 1)
 			{
 				fail=1;
 				break;
@@ -296,29 +274,6 @@ void perform_unit_tests()
 		else
 			xprintf("OK!\n");
 
-		//r2_gen2
-		fail = 0;
-		xprintf("r2_gen_asm: ");
-		for (i=0; i<UNIT_TEST_SMALL_LOOPS; i++)
-		{
-			//Test knuth-yao
-			srand(i);
-			r2_gen_asm(large1);
-
-			srand(i);
-			r2_gen2(large2);
-
-			if (!compare_large_simd(large1,large2))
-			{
-				fail=1;
-				break;
-			}
-		}
-		if (fail==1)
-			xprintf("BAD\n");
-		else
-			xprintf("OK\n");
-
 
 		xputs("bitreverse_asm:");
 		fail=0;
@@ -326,12 +281,12 @@ void perform_unit_tests()
 		{
 			if ((i%100)==0)
 				xputc('.');
-			get_ntt_random_numbers(large1,large2,i);
+			get_small_ntt_random_numbers(small1,small2,i);
 
-			bitreverse_asm(large1);
-			bitreverse2(large2);
+			bitreverse_asm(small1);
+			bitreverse2(small2);
 
-			if (!compare_large_simd(large1,large2))
+			if (memcompare(small1, small2, M) != 1)
 			{
 				fail=1;
 				break;
@@ -347,30 +302,17 @@ void perform_unit_tests()
 		fail=0;
 		for (i=0; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
 		{
+			uint16_t small1_asm[M],small2_asm[M],res_asm[M],res[M];
+
 			srand(i);
-			for (j=0; j<M/2; j++)
-			{
-				rnd1=rand()&COEFFICIENT_ALL_ONES;
-				rnd2=rand()&COEFFICIENT_ALL_ONES;
-				rnd1=j+0xFFF;
-				rnd2=j+1+0xFFF;
-				large1[j]=(rnd1&0xffff)+((rnd2&0xffff)<<16);
-				small1_0[j]=rnd1;
-				small1_1[j]=rnd2;
+			int j;
+			get_small_ntt_random_numbers(small1_asm,small1,i);
+			get_small_ntt_random_numbers(small2_asm,small2,i+1);
 
-				rnd1=rand();
-				rnd2=rand();
-				rnd1=j+0xFFF;
-				rnd2=j+1+0xFFF;
-				large2[j]=(rnd1&0xffff)+((rnd2&0xffff)<<16);
-				small2_0[j]=rnd1;
-				small2_1[j]=rnd2;
-			}
+			coefficient_mul_asm(res_asm,small1,small2);
+			coefficient_mul2(res,small1,small2);
 
-			coefficient_mul_asm(large1,large1,large2);
-			coefficient_mul(small1_0,small1_1,small2_0,small2_1);
-
-			if (!compare_simd(small1_0,small1_1,large1))
+			if (memcompare(res_asm, res, M) != 1)
 			{
 				fail=1;
 				break;
@@ -387,11 +329,12 @@ void perform_unit_tests()
 		for (i=0; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
 		{
 			srand(i);
-			a_gen_asm(large1);
+			a_gen_asm(small1);
 			srand(i);
-			a_gen2(large2);
+			a_gen2(small2);
 
-			if (!compare_large_simd(large1,large2))
+			//if (!compare_large_simd(large1,large2))
+			if (memcompare(small1, small2, M) != 1)
 			{
 				fail=1;
 				break;
@@ -404,15 +347,16 @@ void perform_unit_tests()
 
 		xputs("r1_gen_asm:");
 		fail=0;
-		for (i=0; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
+		for (i=7; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
 		{
 			srand(i);
-			r1_gen_asm(large1);
+			r1_gen_asm(small1);
 
 			srand(i);
-			r1_gen2(large2);
+			r1_gen2(small2);
 
-			if (!compare_large_simd(large1,large2))
+			//if (!compare_large_simd(large1,large2))
+			if (memcompare(small1, small2, M) != 1)
 			{
 				fail=1;
 				break;
@@ -427,30 +371,17 @@ void perform_unit_tests()
 		fail=0;
 		for (i=0; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
 		{
+			uint16_t small1_asm[M],small2_asm[M],res_asm[M],res[M];
+
 			srand(i);
-			for (j=0; j<M/2; j++)
-			{
-				rnd1=rand()&COEFFICIENT_ALL_ONES;
-				rnd2=rand()&COEFFICIENT_ALL_ONES;
-				rnd1=j+0xFFF;
-				rnd2=j+1+0xFFF;
-				large1[j]=(rnd1&0xffff)+((rnd2&0xffff)<<16);
-				small1_0[j]=rnd1;
-				small1_1[j]=rnd2;
+			int j;
+			get_small_ntt_random_numbers(small1_asm,small1,i);
+			get_small_ntt_random_numbers(small2_asm,small2,i+1);
 
-				rnd1=rand();
-				rnd2=rand();
-				rnd1=2*j+0xFFF;
-				rnd2=2*j+1+0xFFF;
-				large2[j]=(rnd1&0xffff)+((rnd2&0xffff)<<16);
-				small2_0[j]=rnd1;
-				small2_1[j]=rnd2;
-			}
+			coefficient_sub_asm(res_asm,small1,small2);
+			coefficient_sub2(res,small1,small2);
 
-			coefficient_sub_asm(large1,large1,large2);
-			coefficient_sub(small1_0,small1_1,small2_0,small2_1);
-
-			if (!compare_simd(small1_0,small1_1,large1))
+			if (memcompare(res_asm, res, M) != 1)
 			{
 				fail=1;
 				break;
@@ -465,12 +396,11 @@ void perform_unit_tests()
 		fail=0;
 		for (i=0; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
 		{
-			get_rand_input(i,large1,large2);
+			get_small_ntt_random_numbers(small1,small2,i);
+			rearrange_asm(small1);
+			rearrange2(small2);
 
-			rearrange_asm(large1);
-			rearrange2(large2);
-
-			if (!compare_large_simd(large1,large2))
+			if (memcompare(small1, small2, M) != 1)
 			{
 				fail=1;
 				break;
@@ -485,27 +415,28 @@ void perform_unit_tests()
 		fail=0;
 		for (i=0; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
 		{
-			get_ntt_random_numbers(fixed_data1,large1,i);
-			get_ntt_random_numbers(fixed_data2,large2,i);
-			get_ntt_random_numbers(fixed_data3,large3,i);
+			get_small_ntt_random_numbers(fixed_data1,small1,i);
+			get_small_ntt_random_numbers(fixed_data2,small2,i);
+			get_small_ntt_random_numbers(fixed_data3,small3,i);
 
 			fwd_ntt_parallel_asm(fixed_data1);
-			fwd_ntt2(large1);
-			fwd_ntt2(large2);
-			fwd_ntt2(large3);
+			fwd_ntt2(small1);
+			fwd_ntt2(small2);
+			fwd_ntt2(small3);
 
-			if (!compare_large_simd(fixed_data1,large1))
+			if (memcompare(small1, fixed_data1, M) != 1)
 			{
 				fail=1;
 				break;
 			}
 
-			if (!compare_large_simd(fixed_data2,large2))
+			if (memcompare(small2, fixed_data2, M) != 1)
 			{
 				fail=1;
 				break;
 			}
-			if (!compare_large_simd(fixed_data3,large3))
+
+			if (memcompare(small3, fixed_data3, M) != 1)
 			{
 				fail=1;
 				break;
@@ -520,12 +451,12 @@ void perform_unit_tests()
 		fail=0;
 		for (i=0; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
 		{
-			get_ntt_random_numbers(large1,large2,i);
+			get_small_ntt_random_numbers(small1,small2,i);
 
-			fwd_ntt_asm(large1);
-			fwd_ntt2(large2);
+			fwd_ntt_asm(small1);
+			fwd_ntt2(small2);
 
-			if (!compare_large_simd(large1,large2))
+			if (memcompare(small1, small2, M) != 1)
 			{
 				fail=1;
 				break;
@@ -540,12 +471,14 @@ void perform_unit_tests()
 		fail=0;
 		for (i=0; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
 		{
-			get_ntt_random_numbers(large1,large2,i);
+			//get_ntt_random_numbers(large1,large2,i);
+			get_small_ntt_random_numbers(small1,small2,i);
 
-			inv_ntt_asm(large1);
-			inv_ntt2(large2);
+			inv_ntt_asm(small1);
+			inv_ntt2(small2);
 
-			if (!compare_large_simd(large1,large2))
+			//if (!compare_large_simd(large1,large2))
+			if (memcompare(small1, small2, M) != 1)
 			{
 				fail=1;
 				break;
@@ -609,6 +542,46 @@ void perform_unit_tests()
 			xprintf("OK\n");
 		}
 		*/
+
+		//key_gen_asm
+		fail = 0;
+		xprintf("key_gen_asm: ");
+		for (i=0; i<UNIT_TEST_SMALL_LOOPS; i++)
+		{
+			uint16_t small_a[M],small_p[M],small_r2[M],small_a_asm[M],small_p_asm[M],small_r2_asm[M];
+
+			//Test knuth-yao
+			srand(i);
+			//key_gen_asm(large1,large2,large3);
+			key_gen_asm(small_a,small_p,small_r2);
+
+
+			srand(i);
+			key_gen2(small_a_asm,small_p_asm,small_r2_asm);
+
+			//if (!compare_large_simd(small_a,large4))
+			if (memcompare(small_a, small_a_asm, M) != 1)
+			{
+				fail=1;
+				break;
+			}
+			if (memcompare(small_p, small_p_asm, M) != 1)
+			//if (!compare_large_simd(large2,large5))
+			{
+				fail=1;
+				break;
+			}
+			//if (!compare_large_simd(large3,large6))
+			if (memcompare(small_r2, small_r2_asm, M) != 1)
+			{
+				fail=1;
+				break;
+			}
+		}
+		if (fail==1)
+			xprintf("FAIL i=%x\n",i);
+		else
+			xprintf("OK\n");
 	#endif //PERFORM_SMALL_TESTS
 
 
@@ -618,52 +591,60 @@ void perform_unit_tests()
 		xprintf("RLWE_enc: ");
 		for (i=0; i<UNIT_TEST_BIG_LOOPS; i++)
 		{
-			uint32_t large_a[M],large_p[M],large_r2[M];
-			uint32_t large_a_asm[M/2],large_p_asm[M/2],large_r2_asm[M/2];
+			uint16_t small_m[M],small_a[M],small_p[M],small_r2[M],small_c1[M],small_c2[M];
+			uint16_t small_m_asm[M],small_a_asm[M],small_p_asm[M],small_r2_asm[M],small_c1_asm[M],small_c2_asm[M];
 
 			//Test knuth-yao
 			srand(i);
-			message_gen2(large_m);
+			message_gen2(small_m);
 			srand(i);
-			key_gen2(large_a,large_p,large_r2); //a=large, p=large2, r2=large3
+			key_gen2(small_a,small_p,small_r2); //a=large, p=large2, r2=large3
 			srand(i);
-			RLWE_enc2(large_a,large_c1,large_c2,large_m,large_p);
+			RLWE_enc2(small_a,small_c1,small_c2,small_m,small_p);
 
 			srand(i);
-			message_gen_asm(large_m_asm);
+			message_gen_asm(small_m_asm);
 			srand(i);
-			key_gen_asm(large_a_asm,large_p_asm,large_r2_asm);
+			key_gen_asm(small_a_asm,small_p_asm,small_r2_asm);
 			srand(i);
-			RLWE_enc_asm(large_a_asm,large_c1_asm,large_c2_asm,large_m_asm,large_p_asm);
+			RLWE_enc_asm(small_a_asm,small_c1_asm,small_c2_asm,small_m_asm,small_p_asm);
 
-			if (!compare_large_simd(large_m_asm,large_m))
+			if (memcompare(small_m_asm, small_m, M) != 1)
 			{
 				xprintf("message");
 				fail=1;
 				//break;
 			}
 
-			if (!compare_large_simd(large_a_asm,large_a))
+			if (memcompare(small_a_asm, small_a, M) != 1)
 			{
 				xprintf("a");
 				fail=1;
 				//break;
 			}
-			if (!compare_large_simd(large_p_asm,large_p))
+
+			if (memcompare(small_p_asm, small_p, M) != 1)
 			{
 				xprintf("p");
 				fail=1;
 				//break;
 			}
 
-			if (!compare_large_simd(large_c1_asm,large_c1))
+			if (memcompare(small_r2_asm, small_r2, M) != 1)
+			{
+				xprintf("r2");
+				fail=1;
+				//break;
+			}
+
+			if (memcompare(small_c1_asm, small_c1, M) != 1)
 			{
 				xprintf("c1");
 				fail=1;
 				//break;
 			}
 
-			if (!compare_large_simd(large_c2_asm,large_c2))
+			if (memcompare(small_c2_asm, small_c2, M) != 1)
 			{
 				xprintf("c2");
 				fail=1;
@@ -681,28 +662,72 @@ void perform_unit_tests()
 		xprintf("RLWE_dec: ");
 		for (i=0; i<UNIT_TEST_BIG_LOOPS; i++)
 		{
+			uint16_t small_m[M],small_a[M],small_p[M],small_r2[M],small_c1[M],small_c2[M];
+			uint16_t small_m_asm[M],small_a_asm[M],small_p_asm[M],small_r2_asm[M],small_c1_asm[M],small_c2_asm[M];
+
 			//Test knuth-yao
 			srand(i);
-			message_gen2(large_m);
+			message_gen2(small_m);
 
 			srand(i);
-			key_gen2(large4,large5,large6); //a=large4, p=large5, r2=large6
-			srand(i);
-			RLWE_enc2(large4,large_c1,large_c2,large_m,large5);
-			RLWE_dec2(large_c1,large_c2,large6);
+			key_gen2(small_a,small_p,small_r2); //a=large, p=large2, r2=large3
 
 			srand(i);
-			key_gen_asm(large4,large5,large6);//a=large4, p=large5, r2=large6
-			srand(i);
-			message_gen_asm(large_m_asm);
-			srand(i);
-			RLWE_enc_asm(large4,large_c1_asm,large_c2_asm,large_m_asm,large5);
-			RLWE_dec_asm(large_c1_asm,large_c2_asm,large6);
+			RLWE_enc2(small_a,small_c1,small_c2,small_m,small_p);
 
-			if (!compare_large_simd(large_c1_asm,large_c1))
+			RLWE_dec2(small_c1,small_c2,small_r2);
+
+
+			srand(i);
+			message_gen_asm(small_m_asm);
+
+			srand(i);
+			key_gen_asm(small_a_asm,small_p_asm,small_r2_asm);
+
+			srand(i);
+			RLWE_enc_asm(small_a_asm,small_c1_asm,small_c2_asm,small_m_asm,small_p_asm);
+			RLWE_dec_asm(small_c1_asm,small_c2_asm,small_r2_asm);
+
+			if (memcompare(small_m_asm, small_m, M) != 1)
 			{
+				xprintf("message");
 				fail=1;
-				break;
+				//break;
+			}
+
+			if (memcompare(small_a_asm, small_a, M) != 1)
+			{
+				xprintf("a");
+				fail=1;
+				//break;
+			}
+
+			if (memcompare(small_p_asm, small_p, M) != 1)
+			{
+				xprintf("p");
+				fail=1;
+				//break;
+			}
+
+			if (memcompare(small_r2_asm, small_r2, M) != 1)
+			{
+				xprintf("r2");
+				fail=1;
+				//break;
+			}
+
+			if (memcompare(small_c1_asm, small_c1, M) != 1)
+			{
+				xprintf("c1");
+				fail=1;
+				//break;
+			}
+
+			if (memcompare(small_c2_asm, small_c2, M) != 1)
+			{
+				xprintf("c2");
+				fail=1;
+				//break;
 			}
 		}
 		if (fail==1)
@@ -714,42 +739,38 @@ void perform_unit_tests()
 		xprintf("Enc2/Dec2:");
 		for(i=0; (i<UNIT_TEST_BIG_LOOPS) && (fail==0); i++)
 		{
+			uint16_t small_m[M],small_a[M],small_p[M],small_r2[M],small_c1[M],small_c2[M];
 			srand(i);
-			message_gen2(large_m);
+			message_gen2(small_m);
 
-			bitreverse2(large_m);
+			bitreverse2(small_m);
 
-			key_gen2(large_a,large_p,large_r2); //a=large, p=large2, r2=large3
-
-
-			RLWE_enc2(large_a,large_c1,large_c2,large_m,large_p);
+			key_gen2(small_a,small_p,small_r2); //a=large, p=large2, r2=large3
 
 
-			RLWE_dec2(large_c1,large_c2,large_r2);
+			RLWE_enc2(small_a,small_c1,small_c2,small_m,small_p);
+
+
+			RLWE_dec2(small_c1,small_c2,small_r2);
 
 			for(j=0; j<M; j++)
 			{
-				if ((large_c1[j]>QBY4) && (large_c1[j]<QBY4_TIMES3))
-					large_c1[j] = 1;
+				if ((small_c1[j]>QBY4) && (small_c1[j]<QBY4_TIMES3))
+					small_c1[j] = 1;
 				else
-					large_c1[j] = 0;
+					small_c1[j] = 0;
 			}
 
 			//Determine if the decryption was correct:
-			bitreverse2(large_m);
+			bitreverse2(small_m);
 
-			rearrange_for_final_test(large_c1,large1);
-			//bitreverse2(large_c1);
-			for (j=0; j<M; j++)
+			rearrange_for_final_test(small_c1,small1);
+
+			if (memcompare(small_m, small1, M) != 1)
 			{
-				if (large_m[j]!=large1[j])
-				{
-					fail=1;
-					break;
-				}
-			}
-			if (fail==1)
+				fail=1;
 				break;
+			}
 		}
 		if (fail==1)
 			xprintf("FAIL i=%x\n",i);
@@ -766,71 +787,38 @@ void perform_unit_tests()
 		for(idx=0; (idx<UNIT_TEST_BIG_LOOPS); idx++)
 	#endif
 		{
+			uint16_t small_m[M],small_a[M],small_p[M],small_r2[M],small_c1[M],small_c2[M];
+
 			if (idx%100==0) xputc('.');
 
 			srand(idx);
 
-			if (idx==0)
-			{
-				for (j=0; j<M/2; j++)
-				{
-					if (j<M/4)
-					{
-						large_m_asm[j]=1+(1<<16);
-					}
-					else
-					{
-						large_m_asm[j]=0;
-					}
-					large4[j]=1+(1<<16);
-					large5[j]=1+(1<<16);
-					large6[j]=1+(1<<16);
-				}
-			}
-			else
-			{
-				message_gen_asm(large_m_asm);
-				key_gen_asm(large4,large5,large6); //a=large4, p=large5, r2=large6
-			}
-			bitreverse_asm(large_m_asm);
+			message_gen_asm(small_m);
+			key_gen_asm(small_a,small_p,small_r2); //a=large4, p=large5, r2=large6
 
-			RLWE_enc_asm(large4,large_c1_asm,large_c2_asm,large_m_asm,large5);
+			bitreverse_asm(small_m);
 
-			RLWE_dec_asm(large_c1_asm,large_c2_asm,large6);
-			uint32_t tmp1,tmp2;
+			RLWE_enc_asm(small_a,small_c1,small_c2,small_m,small_p);
+
+			RLWE_dec_asm(small_c1,small_c2,small_r2);
+
 			for(j=0; j<M; j++)
 			{
-				tmp1 = large_c1_asm[j]&0xffff;
-				tmp2 = (large_c1_asm[j]>>16)&0xffff;
-
-				if ((tmp1>QBY4) && (tmp1<QBY4_TIMES3))
-					tmp1 = 1;
+				if ((small_c1[j]>QBY4) && (small_c1[j]<QBY4_TIMES3))
+					small_c1[j] = 1;
 				else
-					tmp1 = 0;
-
-				if ((tmp2>QBY4) && (tmp2<QBY4_TIMES3))
-					tmp2 = 1;
-				else
-					tmp2 = 0;
-
-				large_c1_asm[j] = tmp1 + (tmp2<<16);
+					small_c1[j] = 0;
 			}
 
 			//Determine if the decryption was correct:
-			bitreverse_asm(large_m_asm);
+			bitreverse_asm(small_m);
 
-			rearrange_for_final_test_asm(large_c1_asm,large1);
-			for (j=0; j<M/2; j++)
+			rearrange_for_final_test_asm(small_c1,small1);
+			if (memcompare(small_m, small1, M) != 1)
 			{
-				if (large_m_asm[j]!=large1[j])
-				{
-					xprintf("idx=%d j=%d ",idx,j);
-					fail=1;
-					break;
-				}
-			}
-			if (fail==1)
+				fail=1;
 				break;
+			}
 		}
 	#ifndef PERFORM_DECRYPTION_ERROR_TEST
 		if (fail==1)
@@ -839,38 +827,7 @@ void perform_unit_tests()
 			xprintf("OK\n");
 	#endif
 
-		//key_gen_asm
-		fail = 0;
-		xprintf("key_gen_asm: ");
-		for (i=0; i<UNIT_TEST_BIG_LOOPS; i++)
-		{
-			//Test knuth-yao
-			srand(i);
-			key_gen_asm(large1,large2,large3);
 
-			srand(i);
-			key_gen2(large4,large5,large6);
-
-			if (!compare_large_simd(large1,large4))
-			{
-				fail=1;
-				break;
-			}
-			if (!compare_large_simd(large2,large5))
-			{
-				fail=1;
-				break;
-			}
-			if (!compare_large_simd(large3,large6))
-			{
-				fail=1;
-				break;
-			}
-		}
-		if (fail==1)
-			xprintf("FAIL i=%x\n",i);
-		else
-			xprintf("OK\n");
 
 	#endif //PERFORM_BIG_TESTS
 

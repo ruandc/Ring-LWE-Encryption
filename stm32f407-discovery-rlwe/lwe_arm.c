@@ -6,37 +6,37 @@
 #include "string.h"
 
 
-void r1_gen_asm(uint32_t * a)
+void r1_gen_asm(uint16_t * a)
 {
 	knuth_yao_asm((uint16_t *) a);
 	fwd_ntt_asm(a);
 }
 
-void key_gen_asm(uint32_t * large1, uint32_t * large2, uint32_t * large3)
+void key_gen_asm(uint16_t * a, uint16_t * r1, uint16_t * r2)
 {
-	a_gen_asm(large1);
-	r1_gen_asm(large2);
-	r2_gen_asm(large3);
+	a_gen_asm(a);
+	r1_gen_asm(r1);
+	r2_gen_asm(r2);
 
-	uint32_t tmp_a[M/2];
-	coefficient_mul_asm(tmp_a, large1, large3);
-	coefficient_sub_asm(large2, large2, tmp_a);
-	rearrange_asm(large3);
+	uint16_t tmp_a[M];
+	coefficient_mul_asm(tmp_a, a, r2);
+	coefficient_sub_asm(r1, r1, tmp_a);
+	rearrange_asm(r2);
 }
 
-void RLWE_dec_asm(uint32_t * c1, uint32_t * c2, uint32_t * r2)
+void RLWE_dec_asm(uint16_t * c1, uint16_t * c2, uint16_t * r2)
 {
 	// c1 <-- c1*r2 + c2
-	coefficient_mul_add_asm((uint16_t *)c1,(uint16_t *)c1,(uint16_t *)r2,(uint16_t *)c2);
+	coefficient_mul_add_asm(c1,c1,r2,c2);
 
 	inv_ntt_asm(c1); //inv_ntt2(c1);
 }
 
-void RLWE_enc_asm(uint32_t * a, uint32_t * c1, uint32_t * c2, uint32_t * m, uint32_t * p)
+void RLWE_enc_asm(uint16_t * a, uint16_t * c1, uint16_t * c2, uint16_t * m, uint16_t * p)
 {
 	int i;
 
-	uint32_t encoded_m[M/2];
+	uint16_t encoded_m[M];
 
 	encode_message_asm(encoded_m,m); //for(i=0; i<M/2; i++) m[i] = ((m[i]&0xffff) * QBY2) + ((((m[i]>>16)&0xffff) * QBY2)<<16);
 
@@ -77,13 +77,12 @@ void RLWE_enc_asm(uint32_t * a, uint32_t * c1, uint32_t * c2, uint32_t * m, uint
 	rearrange_asm(c2);
 }
 
-void message_gen_asm(uint32_t * m)
+void message_gen_asm(uint16_t * m)
 {
 	int i;
-	for(i=0;i<M/2;i++)
+	for(i=0;i<M;i++)
 	{
 		m[i] = rand()%2;
-		m[i] = m[i]+((rand()%2)<<16);
 	}
 }
 
@@ -154,14 +153,14 @@ void bitreverse_asm(uint32_t a[M])
 	}
 }
 
-void ntt_multiply_asm(uint32_t * a, uint32_t * b, uint32_t * c)
+void ntt_multiply_asm(uint16_t * a, uint16_t * b, uint16_t * out)
 {
 	fwd_ntt_asm(a);
 	fwd_ntt_asm(b);
 
-	coefficient_mul_asm(c,a,b);
-	rearrange_asm(c);
-	inv_ntt_asm(c);
+	coefficient_mul_asm(out,a,b);
+	rearrange_asm(out);
+	inv_ntt_asm(out);
 }
 
 void knuth_yao_shuffled_with_asm_optimization(uint16_t * out)
@@ -169,6 +168,7 @@ void knuth_yao_shuffled_with_asm_optimization(uint16_t * out)
 	int counter2 = knuth_yao_asm_shuffle(out);
 	//xprintf("counter2=%d\n",counter2);
 	while (counter2<M) {
+		//uint32_t rnd = get_rand_basic()&(M-1);//Random number with mask
 		uint32_t rnd = get_rand()&(M-1);//Random number with mask
 		if (rnd<counter2)
 		{
