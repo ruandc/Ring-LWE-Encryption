@@ -129,12 +129,9 @@ void perform_unit_tests()
 			knuth_yao_shuffled(small1);
 
 			srand(i * i);
-			knuth_yao_small(small2);
+			knuth_yao_shuffled_with_asm_optimization(small2);
 
-			srand(i * i);
-			knuth_yao_shuffled_with_asm_optimization(small3);
-
-			if (memcompare(small3, small1, M) != 1)
+			if (memcompare(small1, small2, M) != 1)
 			{
 				xprintf("knuth_yao_asm_shuffle fail i=%d\n",i);
 				fail = 1;
@@ -149,13 +146,11 @@ void perform_unit_tests()
 				fail = 1;
 				break;
 			}
-
 		}
 		if (fail == 1)
 			xputs("BAD!\n");
 		else
 			xputs("OK!\n");
-
 
 
 		xprintf("knuth_yao_asm:");
@@ -399,28 +394,28 @@ void perform_unit_tests()
 		fail=0;
 		for (i=0; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
 		{
-			get_small_ntt_random_numbers((uint16_t *)fixed_data1,small1,i);
-			get_small_ntt_random_numbers((uint16_t *)fixed_data2,small2,i);
-			get_small_ntt_random_numbers((uint16_t *)fixed_data3,small3,i);
+			get_small_ntt_random_numbers(fixed_data1,small1,i);
+			get_small_ntt_random_numbers(fixed_data2,small2,i);
+			get_small_ntt_random_numbers(fixed_data3,small3,i);
 
 			fwd_ntt_parallel_asm(fixed_data1);
 			fwd_ntt2(small1);
 			fwd_ntt2(small2);
 			fwd_ntt2(small3);
 
-			if (memcompare(small1, (uint16_t *)fixed_data1, M) != 1)
+			if (memcompare(small1, fixed_data1, M) != 1)
 			{
 				fail=1;
 				break;
 			}
 
-			if (memcompare(small2, (uint16_t *)fixed_data2, M) != 1)
+			if (memcompare(small2, fixed_data2, M) != 1)
 			{
 				fail=1;
 				break;
 			}
 
-			if (memcompare(small3, (uint16_t *)fixed_data3, M) != 1)
+			if (memcompare(small3, fixed_data3, M) != 1)
 			{
 				fail=1;
 				break;

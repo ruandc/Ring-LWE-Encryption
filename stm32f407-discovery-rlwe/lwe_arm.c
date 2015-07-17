@@ -3,13 +3,16 @@
 #include "global.h"
 #include "stdint.h"
 #include "stdlib.h"
-#include "string.h"
 #include "lwe.h"
 
 
 void r1_gen_asm(uint16_t * a)
 {
-	knuth_yao_asm((uint16_t *) a);
+	#ifdef USE_KNUTH_YAO_SHUFFLE
+		knuth_yao_shuffled_with_asm_optimization(a);
+	#else
+		knuth_yao_asm(a);
+	#endif
 	fwd_ntt_asm(a);
 }
 
@@ -40,9 +43,15 @@ void RLWE_enc_asm(uint16_t * a, uint16_t * c1, uint16_t * c2, uint16_t * m, uint
 	encode_message_asm(encoded_m,m); //for(i=0; i<M/2; i++) m[i] = ((m[i]&0xffff) * QBY2) + ((((m[i]>>16)&0xffff) * QBY2)<<16);
 
 #ifdef USE_PARALLEL
-	knuth_yao_asm((uint16_t *) fixed_data1);
-	knuth_yao_asm((uint16_t *) fixed_data2);
-	knuth_yao_asm((uint16_t *) fixed_data3);
+	#ifdef USE_KNUTH_YAO_SHUFFLE
+		knuth_yao_shuffled_with_asm_optimization((uint16_t *)fixed_data1);
+		knuth_yao_shuffled_with_asm_optimization((uint16_t *)fixed_data2);
+		knuth_yao_shuffled_with_asm_optimization((uint16_t *)fixed_data3);
+	#else
+		knuth_yao_asm(fixed_data1);
+		knuth_yao_asm(fixed_data2);
+		knuth_yao_asm(fixed_data3);
+	#endif
 
 	coefficient_add_asm((uint16_t *)fixed_data3, (uint16_t *)fixed_data3, (uint16_t *)encoded_m);	// e3 <-- e3 + m
 
@@ -87,6 +96,7 @@ void message_gen_asm(uint16_t * m)
 
 void rearrange_for_final_test_asm(uint32_t in[M/2],uint32_t out[M/2])
 {
+	//TODO: Write this routine using uint16_t
 	int i;
 
 	for (i=0; i<M/2; i+=2)

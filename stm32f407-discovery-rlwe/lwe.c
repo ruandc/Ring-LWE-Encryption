@@ -56,7 +56,7 @@ uint32_t clz(uint32_t a) {
  *
  * returns ret st 0 <= ret < q
  */
-uint32_t mod(uint32_t x) {
+uint16_t mod(uint32_t x) {
   int a = (int) x;
   int ret2 = (a % MODULUS) >= 0 ? (a % MODULUS) : (a % MODULUS) + MODULUS;
   while (ret2 < 0) {
@@ -74,25 +74,7 @@ uint32_t mod(uint32_t x) {
   return (uint32_t) ret2;
 }
 
-
 void knuth_yao2(uint16_t a[M]) {
-  int i;
-  uint32_t rnd;
-  int sample_in_table;
-  rnd = get_rand();
-  for (i = 0; i < M / 2; i++) {
-#ifdef DISABLE_KNUTH_YAO
-    a[2 * i + 1] = 0;
-    a[2 * i] = 0;
-#else
-    a[2 * i] = knuth_yao_single_number(&rnd,&sample_in_table);
-    a[2 * i+1] = knuth_yao_single_number(&rnd,&sample_in_table);
-#endif
-  }
-}
-
-void knuth_yao_small(uint16_t a[M])
-{
   int i;
   uint32_t rnd;
   int sample_in_table;
@@ -476,8 +458,14 @@ void a_gen2(uint16_t a[]) {
 }
 
 void r1_gen2(uint16_t r1[]) {
-  knuth_yao2(r1);
-  fwd_ntt2(r1);
+
+	#ifdef USE_KNUTH_YAO_SHUFFLE
+		knuth_yao_shuffled(r1);
+	#else
+		knuth_yao2(r1);
+	#endif
+
+	fwd_ntt2(r1);
 }
 
 void r2_gen2(uint16_t r2[M]) {
@@ -694,37 +682,7 @@ void fwd_ntt2(uint16_t a[]) {
   }
 }
 
-void rearrange(uint32_t a_0[], uint32_t a_1[]) {
-  int i;
-  int bit1, bit2, bit3, bit4, bit5, bit6, bit7;
-  int swp_index;
 
-  uint32_t u1, u2;
-
-  for (i = 0; i < M / 2; i++) {
-    bit1 = i % 2;
-    bit2 = (i >> 1) % 2;
-    bit3 = (i >> 2) % 2;
-    bit4 = (i >> 3) % 2;
-    bit5 = (i >> 4) % 2;
-    bit6 = (i >> 5) % 2;
-    bit7 = (i >> 6) % 2;
-
-    swp_index = bit1 * 64 + bit2 * 32 + bit3 * 16 + bit4 * 8 + bit5 * 4 +
-                bit6 * 2 + bit7;
-
-    if (swp_index > i) {
-      u1 = a_0[i];
-      u2 = a_1[i];
-
-      a_0[i] = a_0[swp_index];
-      a_1[i] = a_1[swp_index];
-
-      a_0[swp_index] = u1;
-      a_1[swp_index] = u2;
-    }
-  }
-}
 
 void inv_ntt2(uint16_t a[M]) {
   int j, k, m;
@@ -874,44 +832,6 @@ uint32_t compare_simd(uint32_t a_0[M / 2], uint32_t a_1[M / 2],
   return 1;
 }
 
-void coefficient_add(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[],
-                     uint32_t b_1[]) {
-  // a = a + b
-  int j;
-
-  for (j = 0; j < M / 2; j++) {
-    a_0[j] = a_0[j] + b_0[j];
-    a_0[j] = mod(a_0[j]);
-    a_1[j] = a_1[j] + b_1[j];
-    a_1[j] = mod(a_1[j]);
-  }
-}
-
-void coefficient_mul(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[],
-                     uint32_t b_1[]) {
-  // a = a * b
-  int j;
-
-  for (j = 0; j < M / 2; j++) {
-    a_0[j] = a_0[j] * b_0[j];
-    a_0[j] = mod(a_0[j]);
-    a_1[j] = a_1[j] * b_1[j];
-    a_1[j] = mod(a_1[j]);
-  }
-}
-
-void coefficient_sub(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[],
-                     uint32_t b_1[]) {
-  int j;
-
-  for (j = 0; j < M / 2; j++) {
-    a_0[j] = a_0[j] - b_0[j];
-    a_0[j] = mod(a_0[j]);
-    a_1[j] = a_1[j] - b_1[j];
-    a_1[j] = mod(a_1[j]);
-  }
-}
-
 uint32_t compare_large_simd(uint32_t large_simd[M / 2], uint32_t large[M]) {
   int j;
   for (j = 0; j < M / 2; j++) {
@@ -991,9 +911,15 @@ void RLWE_enc2(uint16_t a[M], uint16_t c1[M], uint16_t c2[M], uint16_t m[M], uin
     encoded_m[i] = m[i] * QBY2; // encoding of message
   }
 
-  knuth_yao2(e1);
-  knuth_yao2(e2);
-  knuth_yao2(e3);
+#ifdef USE_KNUTH_YAO_SHUFFLE
+	knuth_yao_shuffled(e1);
+	knuth_yao_shuffled(e2);
+	knuth_yao_shuffled(e3);
+#else
+	knuth_yao2(e1);
+	knuth_yao2(e2);
+	knuth_yao2(e3);
+#endif
 
   coefficient_add2(e3, e3, encoded_m); // e3 <-- e3 + m
 
@@ -1028,24 +954,10 @@ void message_gen2(uint16_t m[M]) {
 
 void get_small_ntt_random_numbers(uint16_t *small1, uint16_t *small2, uint32_t i)
 {
-  uint32_t j;
-  uint32_t rnd1, rnd2;
+	uint32_t j;
+	uint32_t rnd1, rnd2;
 
-  srand(i);
-  /*
-  if (i == 0) {
-	for (j = 0; j < M / 2; j++) {
-	  rnd1 = j + 1;
-	  rnd2 = j + 2;
-	  small1[2*j] = (rnd1 & 0xffff);
-	  small1[2*j+1] =  + (rnd2 & 0xffff);
-	  small2[2 * j] = rnd1;
-	  small2[2 * j + 1] = rnd2;
-	}
-  } else {
-
-  }
-  */
+	srand(i);
 	for (j = 0; j < M / 2; j++) {
 	  rnd1 = get_rand() & 0x1FFF;
 	  rnd2 = get_rand() & 0x1FFF;
@@ -1054,7 +966,6 @@ void get_small_ntt_random_numbers(uint16_t *small1, uint16_t *small2, uint32_t i
 	  small2[2 * j] = mod(rnd1);
 	  small2[2 * j + 1] = mod(rnd2);
 	}
-  //}
 }
 
 void get_ntt_random_numbers(uint32_t *large1, uint32_t *large2, uint32_t i) {

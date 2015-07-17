@@ -12,9 +12,9 @@
 #include "stdint.h"
 
 #define attribute_fixed_data1 __attribute__((section(".fixed_data1")));
-extern uint32_t fixed_data1[M/2] attribute_fixed_data1;
-extern uint32_t fixed_data2[M/2] attribute_fixed_data1;
-extern uint32_t fixed_data3[M/2] attribute_fixed_data1;
+extern uint16_t fixed_data1[M] attribute_fixed_data1;
+extern uint16_t fixed_data2[M] attribute_fixed_data1;
+extern uint16_t fixed_data3[M] attribute_fixed_data1;
 
 void knuth_yao_shuffled_with_asm_optimization(uint16_t * out);
 int knuth_yao_asm(uint16_t * vals);
@@ -44,7 +44,7 @@ void inv_ntt_asm(uint16_t * a);
 
 void encode_message_asm(uint16_t * destination, uint16_t * source);
 
-void fwd_ntt_parallel_asm(uint32_t * a);
+void fwd_ntt_parallel_asm(uint16_t * a);
 void RLWE_dec_asm(uint16_t * c1, uint16_t * c2, uint16_t * r2);
 void RLWE_enc_asm(uint16_t * a, uint16_t * c1, uint16_t * c2, uint16_t * out, uint16_t * p);
 void message_gen_asm(uint16_t * out);

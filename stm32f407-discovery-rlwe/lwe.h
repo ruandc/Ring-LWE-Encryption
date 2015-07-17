@@ -26,10 +26,8 @@ void knuth_yao_smaller_tables2(uint32_t a[M]);
 void bitreverse2(uint16_t a[M]);
 void knuth_yao2(uint16_t a[M]);
 void knuth_yao_shuffled(uint16_t result[M]);
-void knuth_yao_small(uint16_t a[M]);
 
-
-uint32_t mod(uint32_t a);
+uint16_t mod(uint32_t a);
 uint32_t compare_simd(uint32_t a_0[128], uint32_t a_1[128], uint32_t large[M]);
 uint32_t compare_large_simd(uint32_t large_simd[M / 2], uint32_t large[M]);
 void coefficient_add2(uint16_t out[M], uint16_t b[M], uint16_t c[M]);
@@ -43,23 +41,12 @@ void coefficient_sub2(uint16_t result[M], uint16_t b[M], uint16_t c[M]);
 void message_gen2(uint16_t m[M]);
 void RLWE_enc2(uint16_t a[M], uint16_t c1[M], uint16_t c2[M], uint16_t m[M], uint16_t p[M]);
 void RLWE_dec2(uint16_t c1[M], uint16_t c2[M], uint16_t r2[M]);
-void coefficient_add(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[],
-                     uint32_t b_1[]);
-void coefficient_mul(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[],
-                     uint32_t b_1[]);
-void coefficient_sub(uint32_t a_0[], uint32_t a_1[], uint32_t b_0[],
-                     uint32_t b_1[]);
-
 void fwd_ntt2(uint16_t a[]);
 void inv_ntt2(uint16_t a[M]);
-
 void rearrange2(uint16_t a[M]);
-
 void get_ntt_random_numbers(uint32_t *large1, uint32_t *large2, uint32_t i);
 void get_small_ntt_random_numbers(uint16_t *small1, uint16_t *small2, uint32_t i);
-
 void rearrange_for_final_test(uint16_t in[M], uint16_t out[M]);
-void rearrange(uint32_t a_0[], uint32_t a_1[]);
 void get_rand_input(uint32_t i, uint32_t large1[M], uint32_t large2[M]);
 uint32_t get_rand();
 uint32_t get_rand_basic();
