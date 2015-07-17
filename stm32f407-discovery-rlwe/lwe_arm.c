@@ -4,6 +4,7 @@
 #include "stdint.h"
 #include "stdlib.h"
 #include "string.h"
+#include "lwe.h"
 
 
 void r1_gen_asm(uint16_t * a)
@@ -34,8 +35,6 @@ void RLWE_dec_asm(uint16_t * c1, uint16_t * c2, uint16_t * r2)
 
 void RLWE_enc_asm(uint16_t * a, uint16_t * c1, uint16_t * c2, uint16_t * m, uint16_t * p)
 {
-	int i;
-
 	uint16_t encoded_m[M];
 
 	encode_message_asm(encoded_m,m); //for(i=0; i<M/2; i++) m[i] = ((m[i]&0xffff) * QBY2) + ((((m[i]>>16)&0xffff) * QBY2)<<16);
@@ -100,6 +99,23 @@ void rearrange_for_final_test_asm(uint32_t in[M/2],uint32_t out[M/2])
 	}
 }
 
+/*
+void rearrange_for_final_test_asm(uint16_t in[M],uint16_t out[M])
+{
+	int i;
+
+	for (i=0; i<M; i+=2)
+	{
+		//out[i/2]=(in[i]&0xffff)+((in[i+1]&0xffff)<<16);
+		out[i/2]=in[i]+in[i+2];
+	}
+	for (i=0; i<M; i+=2)
+	{
+		//out[i/2+M/4]=((in[i]>>16)&0xffff)+(((in[i+1]>>16)&0xffff)<<16);
+		out[i/2+M/4]=in[i+1]+in[i+3];
+	}
+}*/
+
 void insert_lowval(uint32_t * a, uint32_t b)
 {
 	*a = ((b)&0xffff) + ((*a)&0xffff0000);
@@ -112,8 +128,9 @@ void insert_highval(uint32_t * a, uint32_t b)
 
 void bitreverse_asm(uint32_t a[M])
 {
+	//TODO: Convert this routine to take a uint16_t * input
 	int i;
-	int bit1, bit2, bit3, bit4, bit5, bit6, bit7, bit8, bit9, swp_index;
+	int bit1, bit2, bit3, bit4, bit5, bit6, bit7, bit8, swp_index;
 	int q1, r1, q2, r2;
 	int temp;
 
@@ -168,8 +185,8 @@ void knuth_yao_shuffled_with_asm_optimization(uint16_t * out)
 	int counter2 = knuth_yao_asm_shuffle(out);
 	//xprintf("counter2=%d\n",counter2);
 	while (counter2<M) {
-		//uint32_t rnd = get_rand_basic()&(M-1);//Random number with mask
-		uint32_t rnd = get_rand()&(M-1);//Random number with mask
+		uint32_t rnd = get_rand_basic()&(M-1);//Random number with mask
+		//uint32_t rnd = get_rand()&(M-1);//Random number with mask
 		if (rnd<counter2)
 		{
 			//Swap

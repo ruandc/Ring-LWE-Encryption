@@ -49,7 +49,7 @@ void RLWE_dec_asm(uint16_t * c1, uint16_t * c2, uint16_t * r2);
 void RLWE_enc_asm(uint16_t * a, uint16_t * c1, uint16_t * c2, uint16_t * out, uint16_t * p);
 void message_gen_asm(uint16_t * out);
 void key_gen_asm(uint16_t * a, uint16_t * r1, uint16_t * r2);
-void rearrange_for_final_test_asm(uint32_t in[M/2],uint32_t out[M/2]);
+void rearrange_for_final_test_asm(uint32_t in[M],uint32_t out[M]);
 
 void bitreverse_asm(uint32_t a[M]);
 void insert_highval(uint32_t * a, uint32_t b);

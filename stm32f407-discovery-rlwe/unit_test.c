@@ -1,7 +1,6 @@
 #include "global.h"
 #include "speed_test.h"
 #include "term_io.h"
-#include "stdlib.h"
 #include "unit_test.h"
 #include "lwe.h"
 #include "lwe_arm.h"
@@ -45,12 +44,8 @@ int memcompare(uint16_t *a, uint16_t *b, int number_of_elements)
 
 void perform_unit_tests()
 {
-	int i;
-	uint32_t j,num,num1,num2,fail,large1[M],large2[M],large3[M],large4[M],large5[M],large6[M],large_m[M],large_m_asm[M/2],large_c1[M],large_c2[M],large_c1_asm[M/2],large_c2_asm[M/2],large_a[M],large_p[M],large_r2[M];
-	uint32_t small1_0[M/2],small1_1[M/2],small2_0[M/2],small2_1[M/2];
-	uint32_t rnd,rnd_rem,rnd1,rnd2;
+	int i,j,fail;
 	uint16_t small1[M], small2[M], small3[M];
-	int num16,num32;
 
 	// Clear up terminal
 	xputs("\n\n[Start]\n\n");
@@ -139,10 +134,6 @@ void perform_unit_tests()
 			srand(i * i);
 			knuth_yao_shuffled_with_asm_optimization(small3);
 
-			//qsort (small1, M, sizeof (uint16_t), compare_uint16);
-			//qsort (small2, M, sizeof (uint16_t), compare_uint16);
-			//qsort (small3, M, sizeof (uint16_t), compare_uint16);
-
 			if (memcompare(small3, small1, M) != 1)
 			{
 				xprintf("knuth_yao_asm_shuffle fail i=%d\n",i);
@@ -174,14 +165,11 @@ void perform_unit_tests()
 			if ((i%100)==0)
 				xprintf(".");
 			srand(i);
-			//knuth_yao_asm((uint16_t *) large1);
 			knuth_yao_asm(small1);
 
 			srand(i);
-			//knuth_yao2(large2);
 			knuth_yao2(small2);
 
-			//if (!compare_large_simd(large1,large2))
 			if (memcompare(small2, small1, M) != 1)
 			{
 				xprintf("i=%d \n",i);
@@ -210,7 +198,6 @@ void perform_unit_tests()
 			srand(i);
 			r2_gen2(small2);
 
-			//if (!compare_large_simd(large1,large2))
 			if (memcompare(small1, small2, M) != 1)
 			{
 				fail=1;
@@ -254,7 +241,6 @@ void perform_unit_tests()
 			uint16_t small1_asm[M],small2_asm[M],small3_asm[M],res_asm[M],res[M];
 
 			srand(i);
-			int j;
 			get_small_ntt_random_numbers(small1_asm,small1,i);
 			get_small_ntt_random_numbers(small2_asm,small2,i+1);
 			get_small_ntt_random_numbers(small3_asm,small3,i+2);
@@ -283,7 +269,7 @@ void perform_unit_tests()
 				xputc('.');
 			get_small_ntt_random_numbers(small1,small2,i);
 
-			bitreverse_asm(small1);
+			bitreverse_asm((uint32_t *)small1);
 			bitreverse2(small2);
 
 			if (memcompare(small1, small2, M) != 1)
@@ -305,7 +291,6 @@ void perform_unit_tests()
 			uint16_t small1_asm[M],small2_asm[M],res_asm[M],res[M];
 
 			srand(i);
-			int j;
 			get_small_ntt_random_numbers(small1_asm,small1,i);
 			get_small_ntt_random_numbers(small2_asm,small2,i+1);
 
@@ -374,7 +359,6 @@ void perform_unit_tests()
 			uint16_t small1_asm[M],small2_asm[M],res_asm[M],res[M];
 
 			srand(i);
-			int j;
 			get_small_ntt_random_numbers(small1_asm,small1,i);
 			get_small_ntt_random_numbers(small2_asm,small2,i+1);
 
@@ -415,28 +399,28 @@ void perform_unit_tests()
 		fail=0;
 		for (i=0; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
 		{
-			get_small_ntt_random_numbers(fixed_data1,small1,i);
-			get_small_ntt_random_numbers(fixed_data2,small2,i);
-			get_small_ntt_random_numbers(fixed_data3,small3,i);
+			get_small_ntt_random_numbers((uint16_t *)fixed_data1,small1,i);
+			get_small_ntt_random_numbers((uint16_t *)fixed_data2,small2,i);
+			get_small_ntt_random_numbers((uint16_t *)fixed_data3,small3,i);
 
 			fwd_ntt_parallel_asm(fixed_data1);
 			fwd_ntt2(small1);
 			fwd_ntt2(small2);
 			fwd_ntt2(small3);
 
-			if (memcompare(small1, fixed_data1, M) != 1)
+			if (memcompare(small1, (uint16_t *)fixed_data1, M) != 1)
 			{
 				fail=1;
 				break;
 			}
 
-			if (memcompare(small2, fixed_data2, M) != 1)
+			if (memcompare(small2, (uint16_t *)fixed_data2, M) != 1)
 			{
 				fail=1;
 				break;
 			}
 
-			if (memcompare(small3, fixed_data3, M) != 1)
+			if (memcompare(small3, (uint16_t *)fixed_data3, M) != 1)
 			{
 				fail=1;
 				break;
@@ -471,13 +455,11 @@ void perform_unit_tests()
 		fail=0;
 		for (i=0; ((i<UNIT_TEST_SMALL_LOOPS) && (fail==0)); i++)
 		{
-			//get_ntt_random_numbers(large1,large2,i);
 			get_small_ntt_random_numbers(small1,small2,i);
 
 			inv_ntt_asm(small1);
 			inv_ntt2(small2);
 
-			//if (!compare_large_simd(large1,large2))
 			if (memcompare(small1, small2, M) != 1)
 			{
 				fail=1;
@@ -552,26 +534,24 @@ void perform_unit_tests()
 
 			//Test knuth-yao
 			srand(i);
-			//key_gen_asm(large1,large2,large3);
-			key_gen_asm(small_a,small_p,small_r2);
 
+			key_gen_asm(small_a,small_p,small_r2);
 
 			srand(i);
 			key_gen2(small_a_asm,small_p_asm,small_r2_asm);
 
-			//if (!compare_large_simd(small_a,large4))
 			if (memcompare(small_a, small_a_asm, M) != 1)
 			{
 				fail=1;
 				break;
 			}
+
 			if (memcompare(small_p, small_p_asm, M) != 1)
-			//if (!compare_large_simd(large2,large5))
 			{
 				fail=1;
 				break;
 			}
-			//if (!compare_large_simd(large3,large6))
+
 			if (memcompare(small_r2, small_r2_asm, M) != 1)
 			{
 				fail=1;
@@ -779,7 +759,6 @@ void perform_unit_tests()
 
 		fail = 0;
 		xprintf("Enc_asm/Dec_asm:");
-		uint32_t error_count = 0;
 		uint64_t idx = 0;
 	#ifdef PERFORM_DECRYPTION_ERROR_TEST
 		for(idx=0; (idx<5000000); idx++)
@@ -796,7 +775,7 @@ void perform_unit_tests()
 			message_gen_asm(small_m);
 			key_gen_asm(small_a,small_p,small_r2); //a=large4, p=large5, r2=large6
 
-			bitreverse_asm(small_m);
+			bitreverse_asm((uint32_t *)small_m);
 
 			RLWE_enc_asm(small_a,small_c1,small_c2,small_m,small_p);
 
@@ -811,9 +790,9 @@ void perform_unit_tests()
 			}
 
 			//Determine if the decryption was correct:
-			bitreverse_asm(small_m);
+			bitreverse_asm((uint32_t *)small_m);
 
-			rearrange_for_final_test_asm(small_c1,small1);
+			rearrange_for_final_test_asm((uint32_t *)small_c1,(uint32_t *)small1);
 			if (memcompare(small_m, small1, M) != 1)
 			{
 				fail=1;

@@ -29,11 +29,7 @@ void printDuration(uint32_t startTime, uint32_t stopTime, int repeatCount, uint6
 void speed_test()
 {
 	int i;
-	uint32_t j,num,num1,num2,fail,large1[M],large2[M],large3[M],large4[M],large5[M],large6[M],large_m[M],large_m_asm[M],large_c1[M],large_c2[M],large_c1_asm[M],large_c2_asm[M];
-	uint32_t small1_0[M/2],small1_1[M/2],small2_0[M/2],small2_1[M/2];
-	uint16_t small1[M];
-	uint32_t rnd,rnd_rem,rnd1,rnd2;
-	int num16,num32;
+	uint16_t small1[M],small2[M],small3[M],small4[M],small5[M];
 
 	// Allocate variables
 	uint32_t startTime, stopTime;
@@ -93,7 +89,7 @@ void speed_test()
 		startTime = DWT->CYCCNT; // Get the start time
 		for (i=0; i<SPEED_TEST_BIG_LOOPS; i++)
 		{
-			ntt_multiply_asm(large1,large2,large3);
+			ntt_multiply_asm(small1,small2,small3);
 		}
 		stopTime = DWT->CYCCNT; // Get the end time
 		xprintf("ntt_multiply_asm:");
@@ -104,7 +100,7 @@ void speed_test()
 		startTime = DWT->CYCCNT; // Get the start time
 		for (i=0; i<SPEED_TEST_BIG_LOOPS; i++)
 		{
-			RLWE_enc_asm(large4,large_c1_asm,large_c2_asm,large_m_asm,large5);
+			RLWE_enc_asm(small1,small2,small3,small4,small5);
 		}
 		stopTime = DWT->CYCCNT; // Get the end time
 		xprintf("RLWE_enc_asm:");
@@ -115,7 +111,7 @@ void speed_test()
 		startTime = DWT->CYCCNT; // Get the start time
 		for (i=0; i<SPEED_TEST_BIG_LOOPS; i++)
 		{
-			RLWE_dec_asm(large_c1_asm,large_c2_asm,large6);
+			RLWE_dec_asm(small1,small2,small3);
 		}
 		stopTime = DWT->CYCCNT; // Get the end time
 		xprintf("RLWE_dec_asm:");
@@ -126,7 +122,7 @@ void speed_test()
 		startTime = DWT->CYCCNT; // Get the start time
 		for (i=0; i<SPEED_TEST_BIG_LOOPS; i++)
 		{
-			key_gen_asm(large1,large2,large3);
+			key_gen_asm(small1,small2,small3);
 		}
 		stopTime = DWT->CYCCNT; // Get the end time
 		xprintf("key_gen_asm:");
@@ -137,6 +133,7 @@ void speed_test()
 	#endif
 
 	#ifdef PERFORM_MODULO_SPEED_TESTS
+		int num,num16;
 		srand(1000);
 		DWT->CYCCNT=0;
 		startTime = DWT->CYCCNT; // Get the start time
@@ -268,32 +265,18 @@ void speed_test()
 	#endif
 
 	#ifdef PERFORM_SMALL_SPEED_TESTS
-		/*
-		srand(1000);
-		DWT->CYCCNT=0;
-		startTime = DWT->CYCCNT; // Get the start time
-		rnd=rand();
-		rnd_rem=32;
-		for (i=0; i<SPEED_TEST_SMALL_LOOPS; i++)
-		{
-			num = knuth_yao_single_number_asm(&rnd);
-		}
-		stopTime = DWT->CYCCNT; // Get the end time
-		xprintf("knuth_yao_single_number_asm:");
-		printDuration(startTime, stopTime, SPEED_TEST_SMALL_LOOPS,offset_cycles);
-*/
-		/*
+
 		srand(1000);
 		DWT->CYCCNT=0;
 		startTime = DWT->CYCCNT; // Get the start time
 		for (i=0; i<SPEED_TEST_SMALL_LOOPS/100; i++)
 		{
-			fwd_ntt2(large1);
+			fwd_ntt2(small1);
 		}
 		stopTime = DWT->CYCCNT; // Get the end time
-		xprintf("fwd_ntt:");
-		printDuration(startTime, stopTime, SPEED_TEST_SMALL_LOOPS/100,offset_cycles);
-*/
+		xprintf("fwd_ntt2:");
+		printDuration(startTime, stopTime, SPEED_TEST_SMALL_LOOPS/100,offset_cycles,false);
+
 		srand(1000);
 		DWT->CYCCNT=0;
 		startTime = DWT->CYCCNT; // Get the start time
@@ -311,7 +294,7 @@ void speed_test()
 		startTime = DWT->CYCCNT; // Get the start time
 		for (i=0; i<SPEED_TEST_SMALL_LOOPS/100; i++)
 		{
-			fwd_ntt_asm(large1);
+			fwd_ntt_asm(small1);
 		}
 		stopTime = DWT->CYCCNT; // Get the end time
 		xprintf("fwd_ntt_asm:");
@@ -322,7 +305,7 @@ void speed_test()
 		startTime = DWT->CYCCNT; // Get the start time
 		for (i=0; i<SPEED_TEST_SMALL_LOOPS/100; i++)
 		{
-			inv_ntt_asm(large1);
+			inv_ntt_asm(small1);
 		}
 		stopTime = DWT->CYCCNT; // Get the end time
 		xprintf("inv_ntt_asm:");
@@ -333,7 +316,7 @@ void speed_test()
 		startTime = DWT->CYCCNT; // Get the start time
 		for (i=0; i<SPEED_TEST_SMALL_LOOPS/100; i++)
 		{
-			coefficient_add_asm(large1,large2,large3);
+			coefficient_add_asm(small1,small2,small3);
 		}
 		stopTime = DWT->CYCCNT; // Get the end time
 		xprintf("coefficient_add_asm:");
@@ -344,7 +327,7 @@ void speed_test()
 		startTime = DWT->CYCCNT; // Get the start time
 		for (i=0; i<SPEED_TEST_SMALL_LOOPS/100; i++)
 		{
-			coefficient_mul_asm(large1,large2,large3);
+			coefficient_mul_asm(small1,small2,small3);
 		}
 		stopTime = DWT->CYCCNT; // Get the end time
 		xprintf("coefficient_mul_asm:");

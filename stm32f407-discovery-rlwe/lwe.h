@@ -62,5 +62,6 @@ void rearrange_for_final_test(uint16_t in[M], uint16_t out[M]);
 void rearrange(uint32_t a_0[], uint32_t a_1[]);
 void get_rand_input(uint32_t i, uint32_t large1[M], uint32_t large2[M]);
 uint32_t get_rand();
+uint32_t get_rand_basic();
 
 #endif /* LWE_H_ */

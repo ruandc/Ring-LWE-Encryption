@@ -24,7 +24,7 @@ DEFS = -DUSE_STDPERIPH_DRIVER -DSTM32F4XX -DHSE_VALUE=8000000
 STARTUP = ./startup_stm32f40xx.s
 
 MCU = cortex-m4
-MCFLAGS = -mcpu=$(MCU) -mthumb -mlittle-endian -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb-interwork -std=c99 -g3
+MCFLAGS = -mcpu=$(MCU) -mthumb -mlittle-endian -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb-interwork -std=c99 -g3 -Wunused
 STM32_INCLUDES = -I$(CMSIS)/Device/ST/STM32F4xx/Include/ \
 	-I$(CMSIS)/Include/ \
 	-I$(STD_PERIPH)/inc

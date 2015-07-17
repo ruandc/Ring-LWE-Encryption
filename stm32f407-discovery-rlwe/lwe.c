@@ -20,6 +20,11 @@ uint32_t g_fake_rand;
 	  rnd |= 0x80000000; // set the least significant bit
 	  return rnd;
 	}
+
+	uint32_t get_rand_basic()
+	{
+	  return GET_TRNG_NUMBER;
+	}
 	#else
 		uint32_t get_rand()
 		{
@@ -27,6 +32,12 @@ uint32_t g_fake_rand;
 		  rnd |= 0x80000000; // set the least significant bit
 		  return rnd;
 		}
+
+		uint32_t get_rand_basic()
+		{
+		  return rand();
+		}
+
 	#endif
 #endif
 
