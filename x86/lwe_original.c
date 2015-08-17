@@ -1,4 +1,5 @@
 #include "lwe_original.h"
+#include "stdio.h"
 
 void fwd_ntt(int a_0[], int a_1[])
 {
@@ -93,7 +94,7 @@ void a_gen( int a_0[],  int a_1[])
 	fwd_ntt(a_0, a_1);
 }
 
-int compare2(int a_0[128],int a_1[128],int large[M])
+int compare2(int a_0[128],int a_1[128],uint16_t large[M])
 {
 	int j;
 	for (j=0; j<128; j++)
@@ -122,14 +123,17 @@ void knuth_yao( int e_0[],  int e_1[])
 	int integer_equivalent;
 	int flag1;
 	int ran;
+	int sample_in_table;
 
 	uint32_t rnd;
 	int found;
 	rnd=get_rand();
+
+
 	for(sample_cntr=0; sample_cntr<128; sample_cntr++)
 	{
-		e_0[sample_cntr] = knuth_yao_single_number(&rnd);
-		e_1[sample_cntr] = knuth_yao_single_number(&rnd);
+		e_0[sample_cntr] = knuth_yao_single_number(&rnd,&sample_in_table);
+		e_1[sample_cntr] = knuth_yao_single_number(&rnd,&sample_in_table);
 		/*
 		flag1=1;
 		rnd = rand();

@@ -10,11 +10,16 @@ void main()
 	int i;
 	int j;
 	int res;
-	uint32_t large_m[M],large_a[M],large_p[M],large_r2[M],large_c1[M],large_c2[M],large1[M],large2[M],a_0[M/2],a_1[M/2];
+	uint16_t large_m[M],large_a[M],large_p[M],large_r2[M],large_c1[M],large_c2[M],large1[M],large2[M];
+	uint32_t a_0[M/2],a_1[M/2];
 
+
+	printf("knuth_yao_smaller_tables2: ");
 	res = 1;
-	for (i=0; i<0x4FFFF; i++)
+	for (i=0; i<0x4FF; i++)
 	{
+		if ((i%100)==0)
+			printf(".");
 		//Test knuth-yao
 		srand(i*i);
 #ifdef	USE_KNUTH_YAO_ORIGINAL
@@ -33,11 +38,11 @@ void main()
 			break;
 		}
 	}
-	printf("knuth_yao_smaller_tables2: ");
 	if (res==0)
 		printf("BAD!\n");
 	else
 		printf("OK!\n");
+
 
 
 #ifdef USE_FAKE_GET_RAND
@@ -70,20 +75,24 @@ void main()
 		knuth_yao2(large1);
 
 		//if ((!compare(a_0,b_0)) || (!compare(a_1,b_1)))
-		if (compare2(a_1,a_0,large1)==0)
+		if (compare2(a_0,a_1,large1)==0)
+		{
 			res=0;
+			break;
+		}
 	}
 	printf("knuth_yao2: ");
 	if (res==0)
 		printf("BAD!\n");
 	else
 		printf("OK!\n");
+	int sample_in_table;
 
 	for (i=0; i<327670; i++)
 	{
 		srand(i*i);
 		uint32_t rnd = get_rand();
-		uint32_t num1 = knuth_yao_single_number(&rnd);
+		uint32_t num1 = knuth_yao_single_number(&rnd,&sample_in_table);
 
 		srand(i*i);
 		rnd = get_rand();
@@ -167,7 +176,10 @@ void main()
 
 		//if ((!compare(a_0,b_0)) || (!compare(a_1,b_1)))
 		if (compare2(a_0,a_1,large1)==0)
+		{
 			res=0;
+			break;
+		}
 	}
 	printf("fwd_ntt2: ");
 	if (res==0)
