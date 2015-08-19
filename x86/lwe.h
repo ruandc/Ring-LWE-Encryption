@@ -17,11 +17,12 @@
 extern uint32_t g_fake_rand;
 #endif
 
-bool compare_vectors(uint32_t *a, uint32_t *b);
+bool compare_vectors(uint16_t *a, uint16_t *b);
 uint32_t knuth_yao_smaller_tables_single_number(uint32_t *rnd);
 uint32_t knuth_yao_single_number_optimized(uint32_t *rnd);
 uint32_t knuth_yao_single_number_pmat_optimized();
 uint32_t knuth_yao_single_number(uint32_t *rnd, int * sample_in_table);
+void knuth_yao_small(uint16_t a[M]);
 void knuth_yao_smaller_tables2(uint16_t a[M]);
 void bitreverse2(uint16_t a[M]);
 void knuth_yao2(uint16_t a[M]);

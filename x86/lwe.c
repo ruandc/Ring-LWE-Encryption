@@ -148,12 +148,27 @@ void knuth_yao_shuffled(uint16_t result[M])
 }
 
 //#define NEW_RND_BOTTOM 0
-//#define NEW_RND_LARGE 32-8
-//#define NEW_RND_MID 32-5
 
 #define NEW_RND_BOTTOM 1
-//#define NEW_RND_LARGE 32 - 9
-//#define NEW_RND_MID 32 - 6
+#define NEW_RND_LARGE 32 - 9
+#define NEW_RND_MID 32 - 6
+
+void knuth_yao_small(uint16_t a[M])
+{
+  int i;
+  uint32_t rnd;
+  uint32_t sample_in_table;
+  rnd = get_rand();
+  for (i = 0; i < M / 2; i++) {
+#ifdef DISABLE_KNUTH_YAO
+    a[2 * i + 1] = 0;
+    a[2 * i] = 0;
+#else
+    a[2 * i + 1] = knuth_yao_single_number(&rnd,&sample_in_table);
+    a[2 * i] = knuth_yao_single_number(&rnd,&sample_in_table);
+#endif
+  }
+}
 
 void knuth_yao_smaller_tables2(uint16_t *a) {
   int i;
@@ -469,10 +484,10 @@ void r1_gen2(uint16_t r1[]) {
 }
 
 void r2_gen2(uint16_t r2[M]) {
-  uint32_t i, j, r, bit, sign;
+  uint16_t i, j, r, bit, sign;
 
   for (i = 0; i < M;) {
-    r = (uint32_t) rand(); // NB: Need to ensure that this is a good source of entropy
+    r = (uint16_t) rand(); // NB: Need to ensure that this is a good source of entropy
 
     for (j = 0; j < 16; j++) {
       bit = r & 1;
@@ -485,34 +500,13 @@ void r2_gen2(uint16_t r2[M]) {
   }
   fwd_ntt2(r2);
 }
-/*
- * void r2_gen2(int r2[M])
-{
-        int i, j, r, bit, sign;
-
-        for(i=0;i<M;)
-        {
-                r = get_rand();
-
-                for (j=0; j<16; j++)
-                {
-                        bit = r&1;
-                        sign = (r>>1)&1;
-                        if (sign==1 && bit==1) bit = 7680;
-                        r2[i++] = bit;
-                        r=r>>2;
-                }
-        }
-        //fwd_ntt2(r2);
-}
- */
 
 void rearrange2(uint16_t a[M]) {
   uint32_t i;
   uint32_t bit1, bit2, bit3, bit4, bit5, bit6, bit7;
   uint32_t swp_index;
 
-  uint32_t u1, u2;
+  uint16_t u1, u2;
 
   for (i = 1; i < M / 2; i++) {
     bit1 = i % 2;
@@ -545,7 +539,8 @@ void rearrange2(uint16_t a[M]) {
   }
 }
 
-bool compare_vectors(uint32_t *a, uint32_t *b) {
+bool compare_vectors(uint16_t *a, uint16_t *b)
+{
   // return
   // (memcmp(large_c1,masked_decrypt_result,M*sizeof(masked_decrypt_result[0]))==0;
   int i;
@@ -561,7 +556,7 @@ void bitreverse2(uint16_t a[M]) {
   uint32_t i, swp_index;
   uint32_t bit1, bit2, bit3, bit4, bit5, bit6, bit7, bit8;
   uint32_t q1, r1, q2, r2;
-  uint32_t temp = 0;
+  uint16_t temp = 0;
 
   for (i = 0; i < M; i++) {
     bit1 = i % 2;
@@ -854,7 +849,7 @@ void coefficient_mul2(uint16_t out[M], uint16_t b[], uint16_t c[]) {
   int j;
 
   for (j = 0; j < M; j++) {
-    out[j] = mod(b[j] * c[j]);
+    out[j] = mod((uint32_t)((uint32_t)b[j] * (uint32_t)c[j]));
   }
 }
 
@@ -864,7 +859,8 @@ void coefficient_add2(uint16_t out[M], uint16_t b[M], uint16_t c[M])
   int j;
 
   for (j = 0; j < M; j++) {
-	  out[j] = mod(b[j] + c[j]);
+	  //out[j] = b[j] + c[j];
+	  out[j] = mod((uint32_t)(b[j] + c[j]));
   }
 }
 
@@ -948,7 +944,7 @@ void RLWE_dec2(uint16_t c1[M], uint16_t c2[M], uint16_t r2[M])
 void message_gen2(uint16_t m[M]) {
   int i;
   for (i = 0; i < M; i++) {
-    m[i] = get_rand() % 2;
+    m[i] = (uint16_t)(get_rand() % 2);
   }
 }
 
