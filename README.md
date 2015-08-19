@@ -45,9 +45,3 @@ For a simple explanation of this work see "Efficient Software Implementation of 
 
 For a more detailed mathematical explanation of the Ring-LWE encryption scheme see "Compact Ring-LWE Cryptoprocessor", available at http://www.cosic.esat.kuleuven.be/publications/article-2444.pdf.
 
-TODO
-==========
-<ul>
-<li>Convert lwe.c and lwe.h to use uint16_t instead of uint32_t</li>
-</ul>
-
