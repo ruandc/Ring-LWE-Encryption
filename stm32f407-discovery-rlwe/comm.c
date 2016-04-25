@@ -72,6 +72,9 @@ void init_USART1(uint32_t baudrate){
 	 * to jump to the USART1_IRQHandler() function
 	 * if the USART1 receive interrupt occurs
 	 */
+
+	/*
+	 * Uncomment this block of code to enable interrupt-based USART1
 	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); // enable the USART1 receive interrupt
 
 	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;		 // we want to configure the USART1 interrupts
@@ -79,6 +82,7 @@ void init_USART1(uint32_t baudrate){
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;		 // this sets the subpriority inside the group
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			 // the USART1 interrupts are globally enabled
 	NVIC_Init(&NVIC_InitStructure);							 // the properties are passed to the NVIC_Init function which takes care of the low level stuff
+*/
 
 	// finally this enables the complete USART1 peripheral
 	USART_Cmd(USART1, ENABLE);
@@ -140,17 +144,15 @@ int comm_test (void)
 
 unsigned char comm_get (void)
 {
-	/*
-  //USART_ClearFlag(USARTx, USART_FLAG_ORE );  // Reset overrun error flag, what are we going to do...?
-  USARTx ->SR = (uint16_t) ~USART_FLAG_ORE;
 
-  //while (USART_GetFlagStatus(USARTx, USART_FLAG_RXNE ) == RESET)
-  while ((USARTx ->SR & USART_FLAG_RXNE )== RESET)
+  //USART_ClearFlag(USARTx, USART_FLAG_ORE );  // Reset overrun error flag, what are we going to do...?
+  USART1 ->SR = (uint16_t) ~USART_FLAG_ORE;
+
+  while ((USART1 ->SR & USART_FLAG_RXNE )== RESET)
   {
   }
 
-  //return (unsigned char) USART_ReceiveData(USARTx );
-  return (unsigned char) (USARTx ->DR & (uint16_t) 0x01FF);*/
+  return (unsigned char) (USART1 ->DR & (uint16_t) 0x01FF);
 }
 
 void comm_put (unsigned char d)
@@ -171,8 +173,6 @@ void comm_put (unsigned char d)
 void comm_init (void)
 {
 	init_USART1(9600);
-	//init_USART1(460800); //seems to work OK
-	//921600 doesnt seem to work
 }
 
 
