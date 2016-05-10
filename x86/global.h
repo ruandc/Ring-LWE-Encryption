@@ -91,7 +91,7 @@
 #endif
 
 
-#define USE_TRNG
+//#define USE_TRNG
 #define RNG_ADDR 0x50060800
 
 
