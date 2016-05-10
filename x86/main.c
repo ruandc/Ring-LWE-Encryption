@@ -20,7 +20,6 @@ void main()
 	{
 		if ((i%100)==0)
 			printf(".");
-		//Test knuth-yao
 		srand(i*i);
 #ifdef	USE_KNUTH_YAO_ORIGINAL
 		knuth_yao_original(a_0,a_1);
@@ -63,7 +62,6 @@ void main()
 	res = 1;
 	for (i=0; i<32767; i++)
 	{
-		//Test knuth-yao
 		srand(i*i);
 #ifdef	USE_KNUTH_YAO_ORIGINAL
 		knuth_yao_original(a_0,a_1);
@@ -74,7 +72,6 @@ void main()
 		srand(i*i);
 		knuth_yao2(large1);
 
-		//if ((!compare(a_0,b_0)) || (!compare(a_1,b_1)))
 		if (compare2(a_0,a_1,large1)==0)
 		{
 			res=0;
@@ -111,17 +108,14 @@ void main()
 	else
 		printf("OK!\n");
 
-
-
 	res=1;
 	res = 1;
 	for (i=0; (i<1000) && (res==1); i++)
 	{
-		//Test knuth-yao
 		srand(i);
 		if (i==0)
 		{
-			//a_gen2(large1);
+			//All ones for first test case
 			for (j=0; j<M; j++)
 			{
 				large1[j]=1;
@@ -129,6 +123,7 @@ void main()
 		}
 		else
 		{
+			//Random values for other test cases
 			for (j=0; j<M; j++)
 			{
 				large1[j]=rand()%16;
@@ -168,13 +163,12 @@ void main()
 		//Test knuth-yao
 		srand(i);
 		a_gen(a_0,a_1);
-		//fwd_ntt(a_0,a_1);
+		fwd_ntt(a_0,a_1);
 
 		srand(i);
 		a_gen2(large1);
-		//fwd_ntt2(large1);
+		fwd_ntt2(large1);
 
-		//if ((!compare(a_0,b_0)) || (!compare(a_1,b_1)))
 		if (compare2(a_0,a_1,large1)==0)
 		{
 			res=0;
@@ -235,10 +229,8 @@ void main()
 				large_c1[j] = 0;
 		}
 
-		//Determine if the decryption was correct:
+		//Determine if the decryption was correct
 		bitreverse2(large_m);
-
-
 		rearrange_for_final_test(large_c1,large1);
 		for (j=0; j<M; j++)
 		{
@@ -250,23 +242,6 @@ void main()
 		}
 		if (fail==1)
 			break;
-/*
-		for (j=0; j<64; j++)
-		{
-			if ((large_c1[4*j]!=large_m[2*j]) || (large_c1[4*j+2]!=large_m[2*j+1]))
-			{
-				printf("Error1!! i=%d,j=%d",i,j);
-				fail=1;
-				return;
-			}
-			if ((large_c1[4*j+1]!=large_m[2*(j+64)]) || (large_c1[4*j+3]!=large_m[2*(j+64)+1]))
-			{
-				printf("Error2!! i=%d,j=%d",i,j);
-				fail=1;
-				return;
-			}
-		}
-		*/
 	}
 	if (fail==1)
 		printf("BAD!\n");
@@ -274,10 +249,10 @@ void main()
 		printf("OK!\n");
 
 	fail=0;
-	for (i=0; i<1000; i++)
+	for (i=0; i<100000; i++)
 	{
-		uint32_t large1[M],large2[M],large3[M],large7[M],large8[M];
-		//Test knuth-yao
+		uint16_t large1[M],large2[M],large3[M],large7[M],large8[M];
+		uint16_t tmp_m[M];
 		srand(i);
 		int j;
 		for (j=0; j<M; j++)
@@ -286,21 +261,19 @@ void main()
 			large2[j]=rand()&0x1fff;
 			large3[j]=rand()&0x1fff;
 		}
-		uint32_t tmp_m[M];
-		//coefficient_mul2(tmp_m,a,e1); 		//tmp_m <-- a*e1
-		//coefficient_add2(c1, e2, tmp_m);	// c1 <-- e2 <-- e2 + a*e1(tmp_m);
-		coefficient_mul2(tmp_m,large1,large2); 		//tmp_m <-- a*e1
-		coefficient_add2(large7,tmp_m,large3);
+		coefficient_mul2(tmp_m,large1,large2); 		//tmp_m <-- large1*large2
+		coefficient_add2(large7,tmp_m,large3);		//large7 <-- large1*large2+large3
 
-		coefficient_mul_add2(large8,large1,large2,large3);
+		coefficient_mul_add2(large8,large1,large2,large3); //large8 <-- large1*large2+large3
 
-		//if ((!compare(a_0,b_0)) || (!compare(a_1,b_1)))
 		for (j=0; j<M; j++)
+		{
 			if (large7[j]!=large8[j])
 			{
 				fail=1;
 				break;
 			}
+		}
 	}
 	printf("coefficient_mul_add: ");
 	if (fail==1)
@@ -308,3 +281,4 @@ void main()
 	else
 		printf("OK!\n");
 }
+
