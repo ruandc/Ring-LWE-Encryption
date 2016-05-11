@@ -182,8 +182,6 @@ void knuth_yao_smaller_tables2(uint16_t *a) {
     a[2 * i + 1] = knuth_yao_smaller_tables_single_number(&rnd);
     a[2 * i] = knuth_yao_smaller_tables_single_number(&rnd);
 
-// if (i==2)
-// break;
 #endif
   }
 }
@@ -219,9 +217,6 @@ uint32_t knuth_yao_smaller_tables_single_number(uint32_t *rnd) {
       (*rnd) = get_rand();
     }
     distance = sample & KN_DISTANCE1_MASK;
-    // index = (*rnd)&0xff;
-    // index = state1[15] + 2*state2[15] + 4*state3[15] + 8*state4[15] +
-    // 16*state5[15] + 32*distance;
     index = ((*rnd) & 0x1f) + 32 * distance;
     (*rnd) = (*rnd) >> 5;
     if ((*rnd) == NEW_RND_BOTTOM) {
@@ -253,8 +248,6 @@ uint32_t knuth_yao_smaller_tables_single_number(uint32_t *rnd) {
 #ifdef DEBUG_PRINTF
         printf("rnd:%d, dist:%d, col:%d\n", ((*rnd)), distance, column + 13);
 #endif
-        // high=pmat_cols_small_high[column];
-        // low=pmat_cols_small_low[column];
         low = pmat_cols_small_low2[column];
 
         // if ((int)((unsigned int)distance -
@@ -283,16 +276,9 @@ uint32_t knuth_yao_smaller_tables_single_number(uint32_t *rnd) {
             }
           }
         }
-        // else
-        //{
-        //	distance = distance - pmat_cols_small_hamming[column];
-        //}
       }
       for (column = HAMMING_TABLE_SIZE; (column < (109 - 13)); column++) {
-        // high=pmat_cols_small_high[column];
-        // low=pmat_cols_small_low[column];
         high = pmat_cols_small_high2[column];
-        // high=pmat_cols_small_high3[column-25];
         low = pmat_cols_small_low2[column];
 
         distance = distance * 2 + ((*rnd) & 1);
@@ -305,7 +291,6 @@ uint32_t knuth_yao_smaller_tables_single_number(uint32_t *rnd) {
         printf("rnd:%d, dist:%d, col:%d\n", ((*rnd)), distance, column);
 #endif
 
-        // for(row=54; row>(54-32); row--)
         for (row = 54; row >= 32; row--) {
           distance =
               distance - (high >> 31); // subtract the most significant bit
@@ -384,9 +369,6 @@ uint32_t knuth_yao_single_number(uint32_t *rnd, int * sample_in_table)
       (*rnd) = get_rand();
     }
     distance = sample & KN_DISTANCE1_MASK;
-    // index = (*rnd)&0xff;
-    // index = state1[15] + 2*state2[15] + 4*state3[15] + 8*state4[15] +
-    // 16*state5[15] + 32*distance;
     index = ((*rnd) & 0x1f) + 32 * distance;
     (*rnd) = (*rnd) >> 5;
     if ((*rnd) == NEW_RND_BOTTOM) {
@@ -449,16 +431,6 @@ uint32_t knuth_yao_single_number(uint32_t *rnd, int * sample_in_table)
   *sample_in_table=0;
   return 0xffffffff;
 }
-
-/*
-void knuth_yao2_optimized( int a[M])
-{
-        int i;
-        for (i=0; i<M; i++)
-        {
-                a[i]=knuth_yao_single_number_optimized();
-        }
-}*/
 
 void a_gen2(uint16_t a[]) {
   uint32_t i, r;
@@ -541,8 +513,6 @@ void rearrange2(uint16_t a[M]) {
 
 bool compare_vectors(uint16_t *a, uint16_t *b)
 {
-  // return
-  // (memcmp(large_c1,masked_decrypt_result,M*sizeof(masked_decrypt_result[0]))==0;
   int i;
   for (i = 0; i < M; i++) {
     if (a[i] != b[i])
@@ -609,33 +579,6 @@ void fwd_ntt2(uint16_t a[]) {
 
   i = 0;
   for (m = 2; m <= M / 2; m = 2 * m) {
-    /*
-    switch (m)
-    {
-            case 2: primrt=7680;
-                            omega = 4298;
-                            break;
-            case 4: primrt=4298;
-                            omega = 6468;
-                            break;
-            case 8: primrt=6468;
-                            omega = 849;
-                            break;
-            case 16:primrt=849;
-                            omega = 2138;
-                            break;
-            case 32:primrt=2138;
-                            omega = 3654;
-                            break;
-            case 64:primrt=3654;
-                            omega = 1714;
-                            break;
-            case 128:primrt=1714;
-                            omega = 5118;
-                            break;
-    }*/
-    // primrt=primrt_table[i];
-    // omega=omega_table[i];
     primrt = primrt_omega_table[i];
     omega = primrt_omega_table[i + 1];
     i++;
@@ -654,7 +597,6 @@ void fwd_ntt2(uint16_t a[]) {
         a[j + k + m] = mod(u1 - t1);
         a[j + k + m + 1] = mod(u2 - t2);
 
-        // printf("(j+k):%d (j+k+m):%d j:%d m:%d k:%d\n",j+m,j+m+k,j,m,k);
       }
       omega = omega * primrt;
       omega = mod(omega);
@@ -668,9 +610,7 @@ void fwd_ntt2(uint16_t a[]) {
     t1 = mod(t1);
     u1 = a[2 * j];
     a[2 * j] = mod(u1 + t1);
-    //a[2 * j] = mod(a[2 * j]);
     a[2 * j + 1] = mod(u1 - t1);
-    //a[2 * j + 1] = mod(a[2 * j + 1]);
 
     omega = omega * primrt;
     omega = mod(omega);
@@ -750,14 +690,10 @@ void inv_ntt2(uint16_t a[M]) {
         u2 = a[2 * (k + j + m / 2)];
 
         a[2 * (k + j)] = mod(u1 + t1);
-        //a[2 * (k + j)] = mod(a[2 * (k + j)]);
         a[2 * (k + j + m / 2)] = mod(u1 - t1);
-        //a[2 * (k + j + m / 2)] = mod(a[2 * (k + j + m / 2)]);
 
         a[2 * (k + j) + 1] = mod(u2 + t2);
-        //a[2 * (k + j) + 1] = mod(a[2 * (k + j) + 1]);
         a[2 * (k + j + m / 2) + 1] = mod(u2 - t2);
-        //a[2 * (k + j + m / 2) + 1] = mod(a[2 * (k + j + m / 2) + 1]);
       }
       omega = omega * primrt;
       omega = mod(omega);
@@ -773,9 +709,7 @@ void inv_ntt2(uint16_t a[M]) {
     t1 = mod(t1);
 
     a[j - 1] = mod(u1 + t1);
-    //a[j - 1] = mod(a[j - 1]);
     a[j] = mod(u1 - t1);
-    //a[j] = mod(a[j]);
     j++;
 
     omega = omega * primrt;
@@ -787,17 +721,13 @@ void inv_ntt2(uint16_t a[M]) {
 
   for (j = 0; j < M;) {
     a[j] = mod(omega * a[j]);
-    //a[j] = mod(a[j]);
 
     a[j] = mod(a[j] * SCALING);
-    //a[j] = mod(a[j]);
 
     j++;
     a[j] = mod(omega2 * a[j]);
-    //a[j] = mod(a[j]);
 
     a[j] = mod(a[j] * SCALING);
-    //a[j] = mod(a[j]);
     j++;
 
     omega = omega * primrt;
@@ -805,13 +735,6 @@ void inv_ntt2(uint16_t a[M]) {
     omega2 = omega2 * primrt;
     omega2 = mod(omega2);
   }
-  /*
-  omega = 1;
-  for(j=0; j<M; j++)
-  {
-          a[j] = a[j] * 7651;
-          a[j] = mod(a[j]);
-  }*/
 }
 
 uint32_t compare_simd(uint32_t a_0[M / 2], uint32_t a_1[M / 2],
@@ -819,7 +742,6 @@ uint32_t compare_simd(uint32_t a_0[M / 2], uint32_t a_1[M / 2],
   int j;
   for (j = 0; j < M / 2; j++) {
     if (((large[j] & 0xffff) != a_0[j]) || ((large[j] >> 16) != a_1[j])) {
-      // xprintf("j=%d ",j);
       return 0;
     }
   }
@@ -831,12 +753,10 @@ uint32_t compare_large_simd(uint32_t large_simd[M / 2], uint32_t large[M]) {
   int j;
   for (j = 0; j < M / 2; j++) {
     if (((large_simd[j] & 0xffff) != large[2 * j])) {
-      // xprintf("(j_low=%x)",j);
       return 0;
     }
 
     if ((large_simd[j] >> 16) != large[2 * j + 1]) {
-      // xprintf("(j_high=%x)",j);
       return 0;
     }
   }
@@ -859,7 +779,6 @@ void coefficient_add2(uint16_t out[M], uint16_t b[M], uint16_t c[M])
   int j;
 
   for (j = 0; j < M; j++) {
-	  //out[j] = b[j] + c[j];
 	  out[j] = mod((uint32_t)(b[j] + c[j]));
   }
 }

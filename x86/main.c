@@ -156,34 +156,9 @@ void main()
 	else
 		printf("OK!\n");
 
-	res=1;
-	res = 1;
-	for (i=0; i<1000; i++)
-	{
-		//Test knuth-yao
-		srand(i);
-		a_gen(a_0,a_1);
-		fwd_ntt(a_0,a_1);
-
-		srand(i);
-		a_gen2(large1);
-		fwd_ntt2(large1);
-
-		if (compare2(a_0,a_1,large1)==0)
-		{
-			res=0;
-			break;
-		}
-	}
-	printf("fwd_ntt2: ");
-	if (res==0)
-		printf("BAD!\n");
-	else
-		printf("OK!\n");
-
-	int fail=0;
+	res = 0;
 	printf("Enc/Dec:");
-	for(i=0; i<20; i++)
+	for(i=0; i<10000; i++)
 	{
 		if ((i%1000)==0)
 		{
@@ -236,47 +211,14 @@ void main()
 		{
 			if (large_m[j]!=large1[j])
 			{
-				fail=1;
+				res=1;
 				break;
 			}
 		}
-		if (fail==1)
+		if (res==1)
 			break;
 	}
-	if (fail==1)
-		printf("BAD!\n");
-	else
-		printf("OK!\n");
-
-	fail=0;
-	for (i=0; i<100000; i++)
-	{
-		uint16_t large1[M],large2[M],large3[M],large7[M],large8[M];
-		uint16_t tmp_m[M];
-		srand(i);
-		int j;
-		for (j=0; j<M; j++)
-		{
-			large1[j]=rand()&0x1fff;
-			large2[j]=rand()&0x1fff;
-			large3[j]=rand()&0x1fff;
-		}
-		coefficient_mul2(tmp_m,large1,large2); 		//tmp_m <-- large1*large2
-		coefficient_add2(large7,tmp_m,large3);		//large7 <-- large1*large2+large3
-
-		coefficient_mul_add2(large8,large1,large2,large3); //large8 <-- large1*large2+large3
-
-		for (j=0; j<M; j++)
-		{
-			if (large7[j]!=large8[j])
-			{
-				fail=1;
-				break;
-			}
-		}
-	}
-	printf("coefficient_mul_add: ");
-	if (fail==1)
+	if (res==1)
 		printf("BAD!\n");
 	else
 		printf("OK!\n");
