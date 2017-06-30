@@ -49,6 +49,11 @@ void get_ntt_random_numbers(uint32_t *large1, uint32_t *large2, uint32_t i);
 void get_small_ntt_random_numbers(uint16_t *small1, uint16_t *small2, uint32_t i);
 void rearrange_for_final_test(uint16_t in[M], uint16_t out[M]);
 void get_rand_input(uint32_t i, uint32_t large1[M], uint32_t large2[M]);
+
+
+void inv_ntt_non_opt(short a[M]);
+void fwd_ntt_non_opt(short a[M]);
+
 uint32_t get_rand();
 uint32_t get_rand_basic();
 

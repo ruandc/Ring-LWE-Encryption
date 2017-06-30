@@ -14,6 +14,103 @@ void main()
 	uint32_t a_0[M/2],a_1[M/2];
 
 
+	res = 1;
+	for (i=0; (i<1000) && (res==1); i++)
+	{
+		srand(i);
+		if (i==0)
+		{
+			//All ones for first test case
+			for (j=0; j<M; j++)
+			{
+				large1[j]=1;
+			}
+		}
+		else
+		{
+			//Random values for other test cases
+			for (j=0; j<M; j++)
+			{
+				large1[j]=rand()%16;
+			}
+		}
+
+		for (j=0; j<M; j++)
+		{
+			large2[j]=large1[j];
+		}
+
+		fwd_ntt_non_opt(large2);
+		inv_ntt_non_opt(large2);
+
+		for (j=0; j<M; j++)
+		{
+			if (large2[j]!=large1[j])
+			{
+				int k;
+				printf("%d, %d\n", i, j);
+				res=0;
+				break;
+			}
+		}
+	}
+	printf("fwd_ntt_non_opt/inv_ntt_non_opt: ");
+	if (res==0)
+		printf("BAD!\n");
+	else
+		printf("OK!\n");
+	return ;
+
+
+	res = 1;
+	for (i=0; (i<1000) && (res==1); i++)
+	{
+		srand(i);
+		if (i==0)
+		{
+			//All ones for first test case
+			for (j=0; j<M; j++)
+			{
+				large1[j]=1;
+			}
+		}
+		else
+		{
+			//Random values for other test cases
+			for (j=0; j<M; j++)
+			{
+				large1[j]=rand()%16;
+			}
+		}
+
+		for (j=0; j<M; j++)
+		{
+			large2[j]=large1[j];
+		}
+
+		fwd_ntt_non_opt(large2);
+		fwd_ntt_opt(large1);
+
+		for (j=0; j<M; j++)
+		{
+			if (large2[j]!=large1[j])
+			{
+				int k;
+				printf("%d, %d\n", i, j);
+				res=0;
+				break;
+			}
+		}
+	}
+	printf("fwd_ntt_non_opt/fwd_ntt_opt: ");
+	if (res==0)
+		printf("BAD!\n");
+	else
+		printf("OK!\n");
+	return ;
+
+
+
 	printf("knuth_yao_smaller_tables2: ");
 	res = 1;
 	for (i=0; i<0x4FF; i++)

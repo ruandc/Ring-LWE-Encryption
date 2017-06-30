@@ -37,7 +37,7 @@
 #define SPEED_TEST_SMALL_LOOPS 1000
 
 
-//#define NTT512
+#define NTT512
 //#define KNUTH_YAO_512
 
 #ifdef KNUTH_YAO_512

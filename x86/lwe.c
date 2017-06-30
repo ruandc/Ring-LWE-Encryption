@@ -74,6 +74,37 @@ uint16_t mod(uint32_t x) {
   return (uint32_t) ret2;
 }
 
+
+
+int16_t barrett(uint32_t a)
+{
+  int res;
+  res = 5*(int)a;
+  res = res >> 16;
+  res = res * 12289;
+  res = a - res;
+  // while(res >= 12289)
+  //   res = res - 12289;
+  // while(res < 0)
+  //   res = res + 12289;
+
+  // assert((res < 12289)&&(res >= 0));
+
+  return res;
+}
+
+int16_t mod_big(uint32_t x) {
+  int ret2 = (int)x%MODULUS;
+  while (ret2 < 0) {
+    ret2 += MODULUS;
+  }
+  while (ret2 > MODULUS) {
+    ret2 -= MODULUS;
+  }
+  assert(ret2 >= 0 && ret2 < MODULUS);
+  return ret2;
+}
+
 void knuth_yao2(uint16_t a[M]) {
   int i;
   uint32_t rnd;
@@ -617,7 +648,76 @@ void fwd_ntt2(uint16_t a[]) {
   }
 }
 
+void fwd_ntt_non_opt(int16_t a[M])
+{
+  int t, m, i, j, j1, j2, x = 0;
+  int S, U, V;
 
+  t = M;
+  for(m = 1; m < M; m=2*m)
+  {
+    x++;
+    t = t/2;
+    for (i = 0; i < m; i++)
+    {
+      j1 = 2 * i * t;
+      j2 = j1 + t - 1;
+      S = psi[m + i];
+      for(j = j1; j<=j2; j++)
+      {
+        U = a[j];
+        V = mod_big(a[j+t] * S);
+
+        if(x%2==0)
+        {
+          a[j] = barrett(U + V);
+          a[j+t] = barrett(U - V);
+        }
+        else
+        {
+          a[j] = U + V;
+          a[j+t] = U - V;
+        }
+      }
+    }
+  }
+}
+
+
+void fwd_ntt_opt(int16_t a[M])
+{
+  int t, m, i, j, j1, j2, x = 0;
+  int S, U, V;
+
+  t = M;
+  for(m = 1; m < M; m=2*m)
+  {
+    x++;
+    t = t/2;
+    for (i = 0; i < m; i++)
+    {
+      j1 = 2 * i * t;
+      j2 = j1 + t - 1;
+      S = psi[m + i];
+      for(j = j1; j<=j2; j++)
+      {
+        U = a[j];
+        V = mod_big(a[j+t] * S);
+
+        if(x%2==0)
+        {
+          a[j] = barrett(U + V);
+          a[j+t] = barrett(U - V);
+        }
+        else
+        {
+          a[j] = U + V;
+          a[j+t] = U - V;
+        }
+      }
+    }
+  }
+}
 
 void inv_ntt2(uint16_t a[M]) {
   int j, k, m;
@@ -735,6 +835,46 @@ void inv_ntt2(uint16_t a[M]) {
     omega2 = omega2 * primrt;
     omega2 = mod(omega2);
   }
+}
+
+void inv_ntt_non_opt(int16_t a[M])
+{
+  int t, h, m, i, j, j1, j2, x=0, ind;
+  int *index;
+  int16_t S, U, V;
+
+  index = inv_psi;
+
+  t = 1;
+  for (m = M; m > 1; m = m/2)
+  {
+    x++;
+    j1 = 0;
+
+    index = index + m/2;
+    for (i = 0; i < (m/2); i++)
+    {
+      j2 = j1 + t -1;
+      S = *(index);
+      for (j = j1; j<=j2; j++)
+      {
+        U = a[j];
+        V = a[j+t];
+        if(x%2==0)
+          a[j] = barrett(U + V);
+        else
+          a[j] = U + V;
+
+        a[j+t] = mod_big((U-V)*S);
+      }
+      j1 = j1 + 2*t;
+      index++;
+    }
+    t = 2*t;
+    index = index - m;
+  }
+  for (j = 0; j < M; j++)
+    a[j] = mod_big(a[j]*12265);
 }
 
 uint32_t compare_simd(uint32_t a_0[M / 2], uint32_t a_1[M / 2],
