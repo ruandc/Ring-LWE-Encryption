@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
+#include "lwe.h"
+#include "luts.h"
 
 /*
  * Untested assembly
@@ -52,6 +54,56 @@ int mul_inv(int a, int modulus )
 	return x1;
 }
 
+void inv_ntt_longa(int16_t a[M], uint16_t k_inv, uint16_t mkinv)
+{
+  int t, h, m, i, j, j1, j2, x=0, ind;
+  int *index;
+  int16_t S, U, V;
+
+  index = inv_psi1;
+
+  t = 1;
+  for (m = M; m > 1; m = m/2)
+  {
+    x++;
+    j1 = 0;
+
+    index = index + m/2;
+    for (i = 0; i < (m/2); i++)
+    {
+      j2 = j1 + t -1;
+      S = *(index);
+      for (j = j1; j<=j2; j++)
+      {
+        U = a[j];
+        V = a[j+t];
+        //a[j] = mod_big(U + V);
+        //a[j+t] = mod_big((U-V)*S);
+        a[j] = U + V;
+        a[j+t] = (U-V)*mod(S*k_inv);
+        if (m==32)
+        {
+        	a[j] = mod_longa(a[j]);
+        	a[j+t] = mod_longa_2x(a[j+t]);
+        }
+        else
+        {
+        	a[j+t] = mod_longa(a[j+t]);
+        }
+      }
+      j1 = j1 + 2*t;
+      index++;
+    }
+    t = 2*t;
+    index = index - m;
+  }
+  for (j = 0; j < M; j++)
+  {
+    a[j] = mod_big(a[j]*12265);
+  }
+}
+
+
 void unit_test_reduction_longa()
 {
 	int i;
@@ -60,6 +112,20 @@ void unit_test_reduction_longa()
 	printf("mod_longa: ");
 	res = 1;
 	uint32_t k_inv=mul_inv(3, 12289);
+	printf("k_inv=%d\n",k_inv);
+
+	uint32_t M_inv=mul_inv(M, 12289);
+	printf("M_inv=%d\n",M_inv);
+
+	uint32_t tmp=k_inv;
+	for (i=0; i<7; i++)
+		tmp=mod(tmp*k_inv);
+	uint32_t Mk_inv7= M_inv*tmp;
+	Mk_inv7=mod(Mk_inv7);
+
+	printf("Mk_inv7=%d\n",Mk_inv7);
+
+
 	for (i=-12289*8; i<=12289*8; i++)
 	{
 		int32_t in=i;
@@ -99,6 +165,55 @@ void unit_test_reduction_longa()
 			printf("in=%x output=%x output_scaled=%x expected=%x\n\r",in,output,output_scaled,expected);
 			res=0;
 			break;
+		}
+	}
+	if (res==0)
+		printf("BAD!\n");
+	else
+		printf("OK!\n");
+
+
+	printf("inv_ntt_longa/inv_ntt_opt: ");
+	res = 1;
+	for (i=0; (i<1000) && (res==1); i++)
+	{
+		uint16_t large1[M],large2[M];
+		int i,j;
+
+		//if (i==0)
+		//{
+		//	//All ones for first test case
+		//	for (j=0; j<M; j++)
+		//	{
+		//		large1[j]=1;
+		//	}
+		//}
+		//else
+		{
+			srand(i);
+			//Random values for other test cases
+			for (j=0; j<M; j++)
+			{
+				large1[j]=rand()%16;
+			}
+		}
+
+		for (j=0; j<M; j++)
+		{
+			large2[j]=large1[j];
+		}
+
+		inv_ntt_non_opt(large2);
+		inv_ntt_longa(large1,k_inv,Mk_inv7);
+
+		for (j=0; j<M; j++)
+		{
+			if (large2[j]!=large1[j])
+			{
+				printf("%d, %d\n", i, j);
+				res=0;
+				break;
+			}
 		}
 	}
 	if (res==0)

@@ -8,7 +8,8 @@ LDFLAGS=
 SOURCES=main.c \
 	lwe.c \
 	lwe_original.c \
-	reduction.c
+	reduction.c \
+	luts.c
 		
 OBJECTS1=$(SOURCES:.S=.o)
 OBJECTS2=$(OBJECTS1:.s=.o)
@@ -18,7 +19,7 @@ EXECUTABLE=LWE
 all: $(SOURCES) $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ -g3
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ ${CFLAGS}
 
 disassemble:
 	$(OBJDUMP) -S --disassemble -D $(EXECUTABLE) > $(EXECUTABLE).dump
