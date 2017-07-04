@@ -1,6 +1,21 @@
 #include <stdint.h>
 #include <stdio.h>
 
+/*
+ * Untested assembly
+	.global mod_longa_asm
+	.extern mod_longa_asm
+	.type mod_longa_asm, %function
+mod_longa_asm:
+	//a=(in&mask12);
+	//r0=in
+	ubfx r3,r0,#0,#12; 	  //r3=r0[11:0]
+	add r3,r3,r3,lsl #1   //r3=3*r3
+	sub r0,r3,r0,lsr #12  //r0=3*r3-r0[31:12}
+
+	mov pc,lr
+*/
+
 const uint32_t mask12 = ((uint64_t)1 << 12) - 1;
 
 int32_t mod_longa(int32_t in)
@@ -22,14 +37,15 @@ int32_t mod_longa_2x(int32_t in)
 	return (9*a-3*b+c);
 }
 
-int mul_inv(int a, int b)
+//Modular inverse
+int mul_inv(int a, int modulus )
 {
-	int b0 = b, t, q;
+	int b0 = modulus, t, q;
 	int x0 = 0, x1 = 1;
-	if (b == 1) return 1;
+	if (modulus == 1) return 1;
 	while (a > 1) {
-		q = a / b;
-		t = b, b = a % b, a = t;
+		q = a / modulus;
+		t = modulus, modulus = a % modulus, a = t;
 		t = x0, x0 = x1 - q * x0, x1 = t;
 	}
 	if (x1 < 0) x1 += b0;
