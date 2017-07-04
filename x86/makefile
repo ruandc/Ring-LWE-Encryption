@@ -17,7 +17,7 @@ EXECUTABLE=LWE
 all: $(SOURCES) $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ -g3
 
 disassemble:
 	$(OBJDUMP) -S --disassemble -D $(EXECUTABLE) > $(EXECUTABLE).dump

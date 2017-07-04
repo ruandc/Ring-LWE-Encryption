@@ -56,6 +56,7 @@ uint32_t clz(uint32_t a) {
  *
  * returns ret st 0 <= ret < q
  */
+
 uint16_t mod(uint32_t x) {
   int a = (int) x;
   int ret2 = (a % MODULUS) >= 0 ? (a % MODULUS) : (a % MODULUS) + MODULUS;
@@ -76,7 +77,7 @@ uint16_t mod(uint32_t x) {
 
 
 
-int16_t barrett(uint32_t a)
+int16_t barrett_32(uint32_t a)
 {
   int res;
   res = 5*(int)a;
@@ -90,7 +91,33 @@ int16_t barrett(uint32_t a)
 
   // assert((res < 12289)&&(res >= 0));
 
+  assert((int32_t)res>=0);
+
   return res;
+}
+
+uint16_t barrett_16(uint16_t a)
+{
+  uint32_t res;
+  res = 5*(uint32_t)a;
+  res = res >> 16;
+  res = res * 12289;
+  res = a - res;
+
+  assert((int32_t)res>=0);
+
+  return res;
+}
+
+uint16_t mod_montgomery(uint32_t a)
+{
+	uint32_t u;
+	u = (a* 12287);
+	//u &= ((1<<18)-1);
+	u = u & 262143;
+	u = u * 12289;
+	u = a+u;
+	return u>>18;
 }
 
 int16_t mod_big(uint32_t x) {
@@ -651,7 +678,7 @@ void fwd_ntt2(uint16_t a[]) {
 void fwd_ntt_non_opt(int16_t a[M])
 {
   int t, m, i, j, j1, j2, x = 0;
-  int S, U, V;
+  int16_t S, U, V;
 
   t = M;
   for(m = 1; m < M; m=2*m)
@@ -665,19 +692,10 @@ void fwd_ntt_non_opt(int16_t a[M])
       S = psi[m + i];
       for(j = j1; j<=j2; j++)
       {
-        U = a[j];
-        V = mod_big(a[j+t] * S);
-
-        if(x%2==0)
-        {
-          a[j] = barrett(U + V);
-          a[j+t] = barrett(U - V);
-        }
-        else
-        {
-          a[j] = U + V;
-          a[j+t] = U - V;
-        }
+		U = a[j];
+		V = mod(a[j+t] * S);
+		a[j] = mod(U + V);
+		a[j+t] = mod(U - V);
       }
     }
   }
@@ -687,7 +705,7 @@ void fwd_ntt_non_opt(int16_t a[M])
 void fwd_ntt_opt(int16_t a[M])
 {
   int t, m, i, j, j1, j2, x = 0;
-  int S, U, V;
+  int16_t S, U, V;
 
   t = M;
   for(m = 1; m < M; m=2*m)
@@ -706,8 +724,8 @@ void fwd_ntt_opt(int16_t a[M])
 
         if(x%2==0)
         {
-          a[j] = barrett(U + V);
-          a[j+t] = barrett(U - V);
+          a[j] = mod(U + V);
+          a[j+t] = mod(U - V);
         }
         else
         {
@@ -843,7 +861,7 @@ void inv_ntt_non_opt(int16_t a[M])
   int *index;
   int16_t S, U, V;
 
-  index = inv_psi;
+  index = inv_psi1;
 
   t = 1;
   for (m = M; m > 1; m = m/2)
@@ -860,10 +878,12 @@ void inv_ntt_non_opt(int16_t a[M])
       {
         U = a[j];
         V = a[j+t];
+        /*
         if(x%2==0)
-          a[j] = barrett(U + V);
+          a[j] = barrett_32(U + V);
         else
-          a[j] = U + V;
+        	*/
+          a[j] = mod_big(U + V);
 
         a[j+t] = mod_big((U-V)*S);
       }
@@ -875,6 +895,92 @@ void inv_ntt_non_opt(int16_t a[M])
   }
   for (j = 0; j < M; j++)
     a[j] = mod_big(a[j]*12265);
+}
+
+
+
+
+/************ structures **************/
+int32_t butterfly (int16_t *a0, int16_t *a1)
+{
+	int32_t temp;
+
+	temp = 36867 + *a0;
+	temp = temp - *a1;
+	*a0 = *a0 + *a1;
+	return temp;
+}
+
+void butterfly_without_barrett(int16_t *a0, int16_t *a1, int16_t s)
+{
+	int32_t temp;
+	temp = butterfly(a0, a1);
+	temp = temp * s;
+	*a1 = mod_montgomery(temp);
+}
+
+void butterfly_with_barrett(int16_t *a0, int16_t *a1, int16_t s)
+{
+	int32_t temp;
+	temp = butterfly(a0, a1);
+	*a0 = barrett_16(*a0);
+	temp = temp * s;
+	*a1 = mod_montgomery(temp);
+}
+
+
+void inv_ntt_opt(int16_t a[M])
+{
+  int t, h, m, i, j, j1, j2, x=0;
+  int *index;
+  int16_t S;
+
+  index = inv_psi2;
+  t = 1;
+  for (m = M; m > 1; m = m/2)
+  {
+    x++;
+    j1 = 0;
+
+    index = index + m/2;
+    for (i = 0; i < (m/2); i++)
+    {
+      j2 = j1 + t -1;
+      S = *(index);
+      for (j = j1; j<=j2; j++)
+      {
+        if(x%2==0)
+        	butterfly_with_barrett(&a[j], &a[j+t], S);
+        else
+        	butterfly_without_barrett(&a[j], &a[j+t], S);
+      }
+      j1 = j1 + 2*t;
+      index++;
+    }
+    t = 2*t;
+    index = index - m;
+  }
+  for (j = 0; j < M; j++)
+    a[j] = mod_big(a[j]*12265);
+}
+
+void inv_opt_8_coeff(int16_t a[M], int offset)
+{
+	int m, i, j, j1, j2;
+	int16_t S;
+
+	S = inv_psi2[offset];
+	butterfly_with_barrett(&a[offset], &a[offset+1], S);
+	S = inv_psi2[offset+2];
+	butterfly_with_barrett(&a[offset+2], &a[offset+3], S);
+	butterfly_with_barrett(&a[offset+4], &a[offset+5], S);
+	butterfly_with_barrett(&a[offset+6], &a[offset+7], S);
+
+
+//	butterfly_with_barrett(&a[j], &a[j+t], S);
+//	butterfly_with_barrett(&a[j], &a[j+t], S);
+//	butterfly_with_barrett(&a[j], &a[j+t], S);
+//	butterfly_with_barrett(&a[j], &a[j+t], S);
 }
 
 uint32_t compare_simd(uint32_t a_0[M / 2], uint32_t a_1[M / 2],

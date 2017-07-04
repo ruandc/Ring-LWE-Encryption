@@ -7,60 +7,43 @@
 
 void main()
 {
-	int i;
+	uint32_t i;
 	int j;
 	int res;
 	uint16_t large_m[M],large_a[M],large_p[M],large_r2[M],large_c1[M],large_c2[M],large1[M],large2[M];
 	uint32_t a_0[M/2],a_1[M/2];
 
 
+
 	res = 1;
-	for (i=0; (i<1000) && (res==1); i++)
+	for (i=0; (i<10000000) && (res==1); i++)
 	{
 		srand(i);
-		if (i==0)
+		//uint32_t in1 = rand()&0xFFFF;
+		uint32_t in1 = i;
+		uint32_t in2 = in1*mod(262144);
+		if (in2>1073491969)
 		{
-			//All ones for first test case
-			for (j=0; j<M; j++)
-			{
-				large1[j]=1;
-			}
-		}
-		else
-		{
-			//Random values for other test cases
-			for (j=0; j<M; j++)
-			{
-				large1[j]=rand()%16;
-			}
+			//test succeeded
+			break;
 		}
 
-		for (j=0; j<M; j++)
+		int16_t out1=mod(in1);
+		int16_t out2=mod_montgomery(in2);
+		out2=out2&0x3FFF;
+		if (out1!=mod(out2))
 		{
-			large2[j]=large1[j];
+			printf("%d", i);
+			res = 0;
+			break;
 		}
 
-		fwd_ntt_non_opt(large2);
-		inv_ntt_non_opt(large2);
-
-		for (j=0; j<M; j++)
-		{
-			if (large2[j]!=large1[j])
-			{
-				int k;
-				printf("%d, %d\n", i, j);
-				res=0;
-				break;
-			}
-		}
 	}
-	printf("fwd_ntt_non_opt/inv_ntt_non_opt: ");
+	printf("mod/mod_montgomery: ");
 	if (res==0)
 		printf("BAD!\n");
 	else
 		printf("OK!\n");
-	return ;
-
 
 	res = 1;
 	for (i=0; (i<1000) && (res==1); i++)
@@ -89,7 +72,61 @@ void main()
 		}
 
 		fwd_ntt_non_opt(large2);
-		fwd_ntt_opt(large1);
+		inv_ntt_opt(large2);
+
+		for (j=0; j<M; j++)
+		{
+			if (large2[j]!=large1[j])
+			{
+				int k;
+				printf("%d, %d\n", i, j);
+				res=0;
+				printf("Initial: ");
+								for(k = 0; k< M; k++)
+									printf("%d ", large1[k]);
+								printf("\n\nFinal: ");
+								for(k = 0; k< M; k++)
+									printf("%d ", large2[k]);
+				break;
+			}
+		}
+	}
+	printf("fwd_ntt_non_opt/inv_ntt_opt: ");
+	if (res==0)
+		printf("BAD!\n");
+	else
+		printf("OK!\n");
+
+
+
+	res = 1;
+	for (i=0; (i<1000) && (res==1); i++)
+	{
+		srand(i);
+		if (i==0)
+		{
+			//All ones for first test case
+			for (j=0; j<M; j++)
+			{
+				large1[j]=1;
+			}
+		}
+		else
+		{
+			//Random values for other test cases
+			for (j=0; j<M; j++)
+			{
+				large1[j]=rand()%16;
+			}
+		}
+
+		for (j=0; j<M; j++)
+		{
+			large2[j]=large1[j];
+		}
+
+		inv_ntt_non_opt(large2);
+		inv_ntt_opt(large1);
 
 		for (j=0; j<M; j++)
 		{
@@ -102,7 +139,7 @@ void main()
 			}
 		}
 	}
-	printf("fwd_ntt_non_opt/fwd_ntt_opt: ");
+	printf("inv_ntt_non_opt/inv_ntt_opt: ");
 	if (res==0)
 		printf("BAD!\n");
 	else
