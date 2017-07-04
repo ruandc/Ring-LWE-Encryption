@@ -7,7 +7,8 @@ LDFLAGS=
 
 SOURCES=main.c \
 	lwe.c \
-	lwe_original.c
+	lwe_original.c \
+	reduction.c
 		
 OBJECTS1=$(SOURCES:.S=.o)
 OBJECTS2=$(OBJECTS1:.s=.o)

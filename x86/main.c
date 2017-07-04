@@ -3,6 +3,7 @@
 #include "lwe.h"
 #include "stdio.h"
 #include "lwe_original.h"
+#include "reduction.h"
 
 
 void main()
@@ -14,6 +15,7 @@ void main()
 	uint32_t a_0[M/2],a_1[M/2];
 
 
+	unit_test_reduction_longa();
 
 	res = 1;
 	for (i=0; (i<10000000) && (res==1); i++)
