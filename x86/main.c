@@ -4,6 +4,7 @@
 #include "stdio.h"
 #include "lwe_original.h"
 #include "reduction.h"
+#include "stdlib.h"
 
 
 void main()

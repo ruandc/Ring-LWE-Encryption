@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "lwe.h"
 #include "luts.h"
+#include "stdlib.h"
 
 /*
  * Untested assembly
@@ -54,7 +55,7 @@ int mul_inv(int a, int modulus )
 	return x1;
 }
 
-void inv_ntt_longa(int16_t a[M], uint16_t k_inv, uint16_t mkinv)
+void inv_ntt_longa(int32_t a[M], uint16_t k_inv, uint16_t mkinv, uint16_t mod_mkinv)
 {
   int t, h, m, i, j, j1, j2, x=0, ind;
   int *index;
@@ -63,7 +64,8 @@ void inv_ntt_longa(int16_t a[M], uint16_t k_inv, uint16_t mkinv)
   index = inv_psi1;
 
   t = 1;
-  for (m = M; m > 1; m = m/2)
+  //for (m = M; m > 1; m = m/2)
+  for (m = M; m > 2; m = m/2)
   {
     x++;
     j1 = 0;
@@ -97,9 +99,67 @@ void inv_ntt_longa(int16_t a[M], uint16_t k_inv, uint16_t mkinv)
     t = 2*t;
     index = index - m;
   }
+
+  /*
   for (j = 0; j < M; j++)
   {
     a[j] = mod_big(a[j]*12265);
+  }
+  */
+
+  printf("t=%d\n",t);
+  for (j = 0; j < t; j++)
+  {
+    //a[j] = mod_big(a[j]*12265);
+    uint32_t u = a[j];
+    uint32_t v = a[j+t];
+    a[j] = mod_longa((u+v)*mkinv);
+    a[j+t] = mod_longa((u-v)*mod_mkinv);
+  }
+}
+
+void inv_ntt_omega_out(int32_t a[M])
+{
+  int t, h, m, i, j, j1, j2, x=0, ind;
+  int *index;
+  int16_t S, U, V;
+
+  index = inv_psi1;
+
+  t = 1;
+  for (m = M; m > 2; m = m/2)
+  {
+    x++;
+    j1 = 0;
+
+    index = index + m/2;
+
+    for (i = 0; i < (m/2); i++)
+    {
+      j2 = j1 + t -1;
+      S = *(index);
+      for (j = j1; j<=j2; j++)
+      {
+        U = a[j];
+        V = a[j+t];
+        a[j] = mod(U + V);
+        a[j+t] = mod((U-V)*S);
+      }
+      j1 = j1 + 2*t;
+      index++;
+    }
+    t = 2*t;
+    index = index - m;
+  }
+//  for (j = 0; j < M; j++)
+//    a[j] = mod(a[j]*12265);
+
+  for (j = 0; j < t; j++)
+  {
+    uint32_t u = a[j];
+    uint32_t v = a[j+t];
+    a[j] = mod((u+v)*12265);
+    a[j+t] = mod(mod((u-v)*12265)*inv_psi1[1]);
   }
 }
 
@@ -114,16 +174,23 @@ void unit_test_reduction_longa()
 	uint32_t k_inv=mul_inv(3, 12289);
 	printf("k_inv=%d\n",k_inv);
 
-	uint32_t M_inv=mul_inv(M, 12289);
+	uint32_t M_inv=mul_inv(512, 12289);
 	printf("M_inv=%d\n",M_inv);
 
 	uint32_t tmp=k_inv;
-	for (i=0; i<7; i++)
-		tmp=mod(tmp*k_inv);
+	for (i=0; i<6; i++)
+		tmp=mod(tmp*k_inv);	
+	uint32_t Mk_inv6= mod(M_inv*tmp);
+
+	tmp=mod(tmp*k_inv);
 	uint32_t Mk_inv7= M_inv*tmp;
 	Mk_inv7=mod(Mk_inv7);
 
+	printf("Mk_inv6=%d\n",Mk_inv7);
 	printf("Mk_inv7=%d\n",Mk_inv7);
+
+	uint32_t mod_Mk_inv6= mod(Mk_inv6*inv_psi1[1]);
+	printf("mod_Mk_inv6=%d\n",mod_Mk_inv6);	
 
 
 	for (i=-12289*8; i<=12289*8; i++)
@@ -177,7 +244,8 @@ void unit_test_reduction_longa()
 	res = 1;
 	for (i=0; (i<1000) && (res==1); i++)
 	{
-		uint16_t large1[M],large2[M];
+		uint16_t large2[M];
+		int32_t large1[M];
 		int i,j;
 
 		//if (i==0)
@@ -204,7 +272,8 @@ void unit_test_reduction_longa()
 		}
 
 		inv_ntt_non_opt(large2);
-		inv_ntt_longa(large1,k_inv,Mk_inv7);
+		//inv_ntt_longa(large1,k_inv,Mk_inv7,mod_Mk_inv6);
+		inv_ntt_omega_out(large1);
 
 		for (j=0; j<M; j++)
 		{
