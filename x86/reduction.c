@@ -3,6 +3,9 @@
 #include "lwe.h"
 #include "luts.h"
 #include "stdlib.h"
+#include "assert.h"
+
+uint32_t k_inv;
 
 /*
  * Untested assembly
@@ -34,6 +37,13 @@ int32_t mod_longa_2x(int32_t in)
 {
 	uint16_t a,b;
 	int16_t c;
+	int32_t upper_bound=12289*8*mod(k_inv*k_inv);
+	int32_t lower_bound=-12289*8*mod(k_inv*k_inv);
+
+	//TODO: determine the exact bounds
+	assert(in>=lower_bound);
+	assert(in<=upper_bound);
+
 	a=(uint16_t)(in&mask12);
 	b=(uint16_t)(in>>12)&mask12;
 	c=(int16_t)(in>>24);
@@ -55,7 +65,7 @@ int mul_inv(int a, int modulus )
 	return x1;
 }
 
-void inv_ntt_longa(int32_t a[M], uint16_t k_inv, uint16_t mkinv, uint16_t mod_mkinv)
+void inv_ntt_longa(int32_t a[M], uint16_t k_inv, uint16_t mkinv, uint16_t mod_mkinv, uint16_t k_inv6, uint16_t k_inv7)
 {
   int t, h, m, i, j, j1, j2, x=0, ind;
   int *index;
@@ -83,7 +93,11 @@ void inv_ntt_longa(int32_t a[M], uint16_t k_inv, uint16_t mkinv, uint16_t mod_mk
         //a[j+t] = mod_big((U-V)*S);
         a[j] = U + V;
         a[j+t] = (U-V)*mod(S*k_inv);
-        if (m==32)
+
+        if ((m==128) && (i==28) && (j==226))
+        	printf("a");
+
+        if ((m==128) || (m==16))
         {
         	a[j] = mod_longa(a[j]);
         	a[j+t] = mod_longa_2x(a[j+t]);
@@ -92,6 +106,8 @@ void inv_ntt_longa(int32_t a[M], uint16_t k_inv, uint16_t mkinv, uint16_t mod_mk
         {
         	a[j+t] = mod_longa(a[j+t]);
         }
+        printf("[%d %d %d] ",m,i,j);
+        fflush(stdout);
       }
       j1 = j1 + 2*t;
       index++;
@@ -107,6 +123,7 @@ void inv_ntt_longa(int32_t a[M], uint16_t k_inv, uint16_t mkinv, uint16_t mod_mk
   }
   */
 
+  /*
   printf("t=%d\n",t);
   for (j = 0; j < t; j++)
   {
@@ -115,6 +132,14 @@ void inv_ntt_longa(int32_t a[M], uint16_t k_inv, uint16_t mkinv, uint16_t mod_mk
     uint32_t v = a[j+t];
     a[j] = mod_longa((u+v)*mkinv);
     a[j+t] = mod_longa((u-v)*mod_mkinv);
+  }*/
+
+  for (j = 0; j < t; j++)
+  {
+    uint32_t u = a[j];
+    uint32_t v = a[j+t];
+    a[j] = mod_longa_2x((u+v)*mod(12265*k_inv7));
+    a[j+t] = mod_longa_2x((u-v)*mod(12265*inv_psi1[1])*k_inv6);
   }
 }
 
@@ -159,7 +184,7 @@ void inv_ntt_omega_out(int32_t a[M])
     uint32_t u = a[j];
     uint32_t v = a[j+t];
     a[j] = mod((u+v)*12265);
-    a[j+t] = mod(mod((u-v)*12265)*inv_psi1[1]);
+    a[j+t] = mod((u-v)*mod(12265*inv_psi1[1]));
   }
 }
 
@@ -171,7 +196,7 @@ void unit_test_reduction_longa()
 
 	printf("mod_longa: ");
 	res = 1;
-	uint32_t k_inv=mul_inv(3, 12289);
+	k_inv=mul_inv(3, 12289);
 	printf("k_inv=%d\n",k_inv);
 
 	uint32_t M_inv=mul_inv(512, 12289);
@@ -179,8 +204,11 @@ void unit_test_reduction_longa()
 
 	uint32_t tmp=k_inv;
 	for (i=0; i<6; i++)
-		tmp=mod(tmp*k_inv);	
-	uint32_t Mk_inv6= mod(M_inv*tmp);
+		tmp=mod(tmp*k_inv);
+	uint32_t k_inv6=tmp;
+	uint32_t k_inv7=mod(tmp*k_inv);
+
+	uint32_t Mk_inv6=mod(M_inv*tmp);
 
 	tmp=mod(tmp*k_inv);
 	uint32_t Mk_inv7= M_inv*tmp;
@@ -220,10 +248,10 @@ void unit_test_reduction_longa()
 	for (i=-12289*8; i<=12289*8; i++)
 	{
 		uint32_t in=i;
-		int32_t scaled_in=(uint32_t)in*k_inv;
+		int32_t scaled_in=(uint32_t)in*mod(k_inv*k_inv);
 
 		uint32_t output=mod_longa_2x(scaled_in);
-		uint32_t output_scaled = mod(output*k_inv);
+		uint32_t output_scaled = mod(output);
 
 		uint32_t expected = mod(in);
 
@@ -272,12 +300,12 @@ void unit_test_reduction_longa()
 		}
 
 		inv_ntt_non_opt(large2);
-		//inv_ntt_longa(large1,k_inv,Mk_inv7,mod_Mk_inv6);
-		inv_ntt_omega_out(large1);
+		inv_ntt_longa(large1,k_inv,Mk_inv7,mod_Mk_inv6,k_inv6,k_inv7);
+		//inv_ntt_omega_out(large1);
 
 		for (j=0; j<M; j++)
 		{
-			if (large2[j]!=large1[j])
+			if (large2[j]!=mod(large1[j]))
 			{
 				printf("%d, %d\n", i, j);
 				res=0;
