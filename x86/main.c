@@ -7,6 +7,91 @@
 #include "stdlib.h"
 
 
+void mul_test(int16_t* a, int16_t* b, int16_t* c, unsigned int N)
+{ // Polynomial multiplication using the schoolbook method, c[x] = a[x]*b[x]
+  // SECURITY NOTE: TO BE USED FOR TESTING ONLY.
+    unsigned int i, j, index, mask = N - 1;
+
+     for (i = 0; i < N; i++) c[i] = 0;
+
+     for (i = 0; i < N; i++) {
+          for (j = 0; j < N; j++) {
+              index = (i+j) & mask;
+              if (i+j >= N) {
+                  c[index] = mod(c[index] - (a[i]*b[j]));
+              } else {
+                  c[index] = mod(c[index] + (a[i]*b[j]));
+              }
+          }
+     }
+}
+
+void unit_test_poly_mul()
+{
+	int res = 1;
+	int i,j;
+	for (i=0; (i<1000) && (res==1); i++)
+	{
+		uint16_t in1[M],in2[M],out1[M],in3[M],in4[M],out2[M];
+
+		srand(i);
+		if (i==0)
+		{
+			//All ones for first test case
+			for (j=0; j<M; j++)
+			{
+				in1[j]=1;
+				in2[j]=1;
+			}
+		}
+		else
+		{
+			//Random values for other test cases
+			for (j=0; j<M; j++)
+			{
+				in1[j]=rand()%16;
+				in2[j]=rand()%16;
+			}
+		}
+		for (j=0; j<M; j++)
+		{
+			in3[j]=in1[j];
+			in4[j]=in2[j];
+		}
+
+		fwd_ntt_non_opt(in1);
+		fwd_ntt_non_opt(in2);
+		coefficient_mul2(out1,in1,in2);
+		inv_ntt_non_opt(out1);
+
+		mul_test(in3,in4,out2,M);
+
+		for (j=0; j<M; j++)
+		{
+			if (out2[j]!=out1[j])
+			{
+				res=0;
+
+				printf("\n\r out1: ");
+				int k;
+				for(k = 0; k< M; k++) printf("%d, %08d\n\r", k, out1[k]);
+				printf("\n\r out2: ");
+				for(k = 0; k< M; k++) printf("%d, %08d\n\r", k, out2[k]);
+				printf("\n\r");
+
+				break;
+			}
+		}
+
+
+	}
+	printf("unit_test_poly_mul: ");
+	if (res==0)
+		printf("BAD!\n");
+	else
+		printf("OK!\n");
+}
+
 void main()
 {
 	uint32_t i;
@@ -16,7 +101,7 @@ void main()
 	uint32_t a_0[M/2],a_1[M/2];
 
 
-	unit_test_reduction_longa();
+
 
 	res = 1;
 	for (i=0; (i<10000000) && (res==1); i++)
@@ -147,6 +232,53 @@ void main()
 		printf("BAD!\n");
 	else
 		printf("OK!\n");
+
+/*
+	res = 1;
+	for (i=0; (i<1000) && (res==1); i++)
+	{
+		uint16_t in1[M],in2[M],out1[M];
+
+		srand(i);
+		if (i==0)
+		{
+			//All ones for first test case
+			for (j=0; j<M; j++)
+			{
+				in1[j]=1;
+				in2[j]=1;
+			}
+		}
+		else
+		{
+			//Random values for other test cases
+			for (j=0; j<M; j++)
+			{
+				in1[j]=rand()%16;
+				in2[j]=rand()%16;
+			}
+		}
+
+		fwd_ntt_non_opt(in1);
+		fwd_ntt_non_opt(in2);
+		coefficient_mul2(out1,in1,in2);
+		inv_ntt_opt(out1);
+		rearrange2(out1);
+
+		printf("\n\r");
+		int k;
+		for(k = 0; k< M; k++) printf("%d ", out1[k]);
+
+	}
+	printf("fwd_ntt_non_opt/inv_ntt_opt: ");
+	if (res==0)
+		printf("BAD!\n");
+	else
+		printf("OK!\n");
+*/
+	unit_test_poly_mul();
+
+	unit_test_reduction_longa();
 	return ;
 
 
