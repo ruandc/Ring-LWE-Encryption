@@ -57,6 +57,9 @@
 #ifdef NTT512
 	#define MODULUS 12289
 	#define M 512
+
+	//#define NTT1024
+	//#define M 1024
 	#define UMOD_CONSTANT 0xAAA71C85
 	#define QBY2 6144
 	#define QBY4 3072

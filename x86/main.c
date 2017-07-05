@@ -26,6 +26,57 @@ void mul_test(int16_t* a, int16_t* b, int16_t* c, unsigned int N)
      }
 }
 
+void unit_test_fwd_inv_ntt_non_opt()
+{
+	int res = 1;
+	int i,j;
+	for (i=0; (i<1000) && (res==1); i++)
+	{
+		uint16_t in1[M],in2[M];
+
+		srand(i);
+		if (i==0)
+		{
+			//All ones for first test case
+			for (j=0; j<M; j++)
+			{
+				in1[j]=1;
+			}
+		}
+		else
+		{
+			//Random values for other test cases
+			for (j=0; j<M; j++)
+			{
+				in1[j]=rand()%16;
+			}
+		}
+		for (j=0; j<M; j++)
+		{
+			in2[j]=in1[j];
+		}
+
+		fwd_ntt_non_opt(in1);
+		inv_ntt_non_opt(in1);
+
+		for (j=0; j<M; j++)
+		{
+			if (in1[j]!=in2[j])
+			{
+				res=0;
+				break;
+			}
+		}
+
+
+	}
+	printf("unit_test_fwd_inv_ntt_non_opt: ");
+	if (res==0)
+		printf("BAD!\n");
+	else
+		printf("OK!\n");
+}
+
 void unit_test_poly_mul()
 {
 	int res = 1;
@@ -74,16 +125,14 @@ void unit_test_poly_mul()
 
 				printf("\n\r out1: ");
 				int k;
-				for(k = 0; k< M; k++) printf("%d, %08d\n\r", k, out1[k]);
+				for(k = 0; k< M; k++) printf("[%d %08d] ", k, out1[k]);
 				printf("\n\r out2: ");
-				for(k = 0; k< M; k++) printf("%d, %08d\n\r", k, out2[k]);
+				for(k = 0; k< M; k++) printf("[%d %08d] ", k, out2[k]);
 				printf("\n\r");
 
 				break;
 			}
 		}
-
-
 	}
 	printf("unit_test_poly_mul: ");
 	if (res==0)
@@ -277,6 +326,7 @@ void main()
 		printf("OK!\n");
 */
 	unit_test_poly_mul();
+	unit_test_fwd_inv_ntt_non_opt();
 
 	unit_test_reduction_longa();
 	return ;

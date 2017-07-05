@@ -893,8 +893,9 @@ void inv_ntt_non_opt(int16_t a[M])
     t = 2*t;
     index = index - m;
   }
+  int m_inv=mul_inv(M,12289);
   for (j = 0; j < M; j++)
-    a[j] = mod_big(a[j]*12265);
+    a[j] = mod_big(a[j]*m_inv);
 }
 
 
@@ -960,8 +961,9 @@ void inv_ntt_opt(int16_t a[M])
     t = 2*t;
     index = index - m;
   }
+  int m_inv=mul_inv(M,12289);
   for (j = 0; j < M; j++)
-    a[j] = mod_big(a[j]*12265);
+    a[j] = mod_big(a[j]*m_inv);
 }
 
 void inv_opt_8_coeff(int16_t a[M], int offset)

@@ -293,12 +293,10 @@ void unit_test_reduction_longa()
 	printf("mod_Mk_inv6=%d\n",mod_Mk_inv6);	
 
 
-
 	unit_test_mod_longa(k_inv, k_inv2);
 
 	unit_test_mod_longa_2x(k_inv2);
 
-	unit_test_poly_mul();
 
 	/*
 	 *
