@@ -46,13 +46,65 @@ mod_longa_2x_asm:
 */
 
 void fwd_ntt_longa(int16_t a[M]);
-void inv_ntt_longa(int16_t a[M]);
+void inv_ntt_longa(int16_t a[M], int k_inv_first, int k_inv_second);
+
+
+void unit_test_longa_fwd_inv_ntt()
+{
+	int res = 1;
+	int i,j;
+	for (i=0; (i<1000) && (res==1); i++)
+	{
+		int16_t in1[M],in2[M];
+
+		srand(i);
+		if (i==0)
+			//All ones for first test case
+			for (j=0; j<M; j++) in1[j]=1;
+		else
+			//Random values for other test cases
+			for (j=0; j<M; j++) in1[j]=rand()%16;
+
+		for (j=0; j<M; j++)	in2[j]=in1[j];
+
+		fwd_ntt_longa(in1);
+
+		int k_inv_first=k_inv;
+		for (j=0; j<8; j++) k_inv_first = mod(k_inv_first*k_inv);
+		int k_inv_second=k_inv;
+		for (j=0; j<8; j++) k_inv_second = mod(k_inv_second*k_inv);
+
+		inv_ntt_longa(in1,k_inv_first,k_inv_second);
+
+		for (j=0; j<M; j++)
+		{
+			if (in2[j]!=mod(in1[j]))
+			{
+				res=0;
+
+				printf("\n\r in1: ");
+				int k;
+				for(k = 0; k< M; k++) printf("[%d %08d] ", k, mod(in1[k]));
+				printf("\n\r in2: ");
+				for(k = 0; k< M; k++) printf("[%d %08d] ", k, in2[k]);
+				printf("\n\r");
+
+				break;
+			}
+		}
+	}
+	printf("unit_test_longa_fwd_inv_ntt: ");
+	if (res==0)
+		printf("BAD!\n");
+	else
+		printf("OK!\n");
+}
 
 void unit_test_longa_poly_mul()
 {
 	int res = 1;
 	int i,j;
-	for (i=0; (i<1000) && (res==1); i++)
+	for (i=0; (i<100) && (res==1); i++)
 	{
 		uint16_t in1[M],in2[M],out1[M],in3[M],in4[M],out2[M];
 
@@ -81,10 +133,15 @@ void unit_test_longa_poly_mul()
 			in4[j]=in2[j];
 		}
 
-		fwd_ntt_non_opt(in1);
-		fwd_ntt_non_opt(in2);
+		fwd_ntt_longa(in1);
+		fwd_ntt_longa(in2);
 		coefficient_mul2(out1,in1,in2);
-		inv_ntt_non_opt(out1);
+
+		int k_inv_first=k_inv;
+		for (j=0; j<12; j++) k_inv_first = mod(k_inv_first*k_inv);
+		int k_inv_second=k_inv;
+		for (j=0; j<12; j++) k_inv_second = mod(k_inv_second*k_inv);
+		inv_ntt_longa(out1,k_inv_first,k_inv_second);
 
 		mul_test(in3,in4,out2,M);
 
@@ -96,7 +153,7 @@ void unit_test_longa_poly_mul()
 
 				printf("\n\r out1: ");
 				int k;
-				for(k = 0; k< M; k++) printf("[%d %08d] ", k, out1[k]);
+				for(k = 0; k< M; k++) printf("[%d %08d] ", k, mod(out1[k]));
 				printf("\n\r out2: ");
 				for(k = 0; k< M; k++) printf("[%d %08d] ", k, out2[k]);
 				printf("\n\r");
@@ -106,51 +163,6 @@ void unit_test_longa_poly_mul()
 		}
 	}
 	printf("unit_test_longa_poly_mul: ");
-	if (res==0)
-		printf("BAD!\n");
-	else
-		printf("OK!\n");
-}
-
-void unit_test_longa_fwd_inv_ntt()
-{
-	int res = 1;
-	int i,j;
-	for (i=0; (i<1000) && (res==1); i++)
-	{
-		int16_t in1[M],in2[M];
-
-		srand(i);
-		if (i==0)
-			//All ones for first test case
-			for (j=0; j<M; j++) in1[j]=1;
-		else
-			//Random values for other test cases
-			for (j=0; j<M; j++) in1[j]=rand()%16;
-
-		for (j=0; j<M; j++)	in2[j]=in1[j];
-
-		fwd_ntt_longa(in1);
-		inv_ntt_longa(in1);
-
-		for (j=0; j<M; j++)
-		{
-			if (in2[j]!=mod(in1[j]))
-			{
-				res=0;
-
-				printf("\n\r in1: ");
-				int k;
-				for(k = 0; k< M; k++) printf("[%d %08d] ", k, mod(in1[k]));
-				printf("\n\r in2: ");
-				for(k = 0; k< M; k++) printf("[%d %08d] ", k, in2[k]);
-				printf("\n\r");
-
-				break;
-			}
-		}
-	}
-	printf("unit_test_longa_fwd_inv_ntt: ");
 	if (res==0)
 		printf("BAD!\n");
 	else
@@ -244,7 +256,7 @@ void fwd_ntt_longa(int16_t poly[M])
   }
 }
 
-void inv_ntt_longa(int16_t poly[M])
+void inv_ntt_longa(int16_t poly[M], int k_inv_first, int k_inv_second)
 {
   int t, h, m, i, j, j1, j2, x=0, ind;
   int *index;
@@ -289,33 +301,18 @@ void inv_ntt_longa(int16_t poly[M])
     index = index - m;
   }
 
-  int k_inv_first=k_inv;
-  for (i=0; i<8; i++)
-	  k_inv_first = mod(k_inv_first*k_inv);
-
-  int k_inv_second=k_inv;
-  for (i=0; i<8; i++)
-	  k_inv_second = mod(k_inv_second*k_inv);
-
   int m_inv=mul_inv(M,12289);
   for (j = 0; j < t; j++)
   {
-    int32_t u = a[j];
-    int32_t v = a[j+t];
+    U = a[j];
+    V = a[j+t];
 
-    //a[j] = mod((u+v)*m_inv);
-    a[j] = mod_longa((u+v) * mod(m_inv*k_inv_second));
-
-    //a[j+t] = mod((u-v)*mod(m_inv*inv_psi1[1]));
-    a[j+t] = mod_longa((u-v) * mod(mod(m_inv*inv_psi1[1])*k_inv_first));
-
-    //int16_t tmp = mod((u-v)*mod(m_inv*inv_psi1[1]));
-    //if (tmp!=mod(a[j+t]))
-    //	printf("a");
+    a[j] = mod_longa((U+V) * mod(m_inv*k_inv_first));
+    a[j+t] = mod_longa((U-V) * mod(mod(m_inv*inv_psi1[1])*k_inv_second));
   }
 
   for (j=0; j<M; j++)
-	  poly[j]=mod(a[j]);
+	  poly[j]=mod(a[j]); //Need to get rid of this
 }
 
 
@@ -430,6 +427,7 @@ void unit_test_reduction_longa()
 	unit_test_mod_longa_2x(k_inv2);
 	unit_test_mod_longa_again();
 	unit_test_longa_fwd_inv_ntt();
+	unit_test_longa_poly_mul();
 
 	printf("DONE");
 
