@@ -122,25 +122,13 @@ void unit_test_longa_fwd_inv_ntt()
 
 		srand(i);
 		if (i==0)
-		{
 			//All ones for first test case
-			for (j=0; j<M; j++)
-			{
-				in1[j]=1;
-			}
-		}
+			for (j=0; j<M; j++) in1[j]=1;
 		else
-		{
 			//Random values for other test cases
-			for (j=0; j<M; j++)
-			{
-				in1[j]=rand()%16;
-			}
-		}
-		for (j=0; j<M; j++)
-		{
-			in2[j]=in1[j];
-		}
+			for (j=0; j<M; j++) in1[j]=rand()%16;
+
+		for (j=0; j<M; j++)	in2[j]=in1[j];
 
 		fwd_ntt_longa(in1);
 		inv_ntt_longa(in1);
@@ -414,7 +402,7 @@ void inv_ntt_longa(int32_t a[M])
         	a[j] = (U+V);							  //0
         	a[j+t] = mod_longa((U-V) * mod(S*k_inv)); //0
         }
-        else if ((m==256) || (m==64) || (m==16) || (m==4))
+        else
         {
         	a[j] = mod_longa(U+V); 					   //k
         	a[j+t]=mod_longa_2x((U-V) * mod(S*k_inv)); //k
