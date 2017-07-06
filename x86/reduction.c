@@ -411,16 +411,29 @@ void inv_ntt_longa(int32_t a[M])
         V = a[j+t];
         //a[j] = mod(U + V);
         //a[j+t] = mod((U-V)*S);
-        if ((m==256) || (m==64) || (m==16) || (m==4))
+        if (m==512)
         {
-        	a[j] = mod_longa_2x((U+V) * mod(mod(k_inv)*k_inv));
-        	a[j+t]=mod_longa_2x((U-V) * mod(mod(S*k_inv)*k_inv));
+        	//a[j] = mod_longa((U+V));
+        	//a[j+t] = mod_longa((U-V) * mod(S));
+        	a[j] = mod_longa((U+V));
+        	a[j+t] = mod_longa((U-V) * mod(S));
         }
-        else
+        else if ((m==128) || (m==32) || (m==8))
         {
-        	a[j] = mod_longa((U+V) * k_inv);
-        	a[j+t] = mod_longa((U-V) * mod(S*k_inv));
+        	//a[j] = mod_longa((U+V) * k_inv);
+        	//a[j+t] = mod_longa((U-V) * mod(S*k_inv));
+        	a[j] = mod_longa((U+V));
+        	a[j+t] = mod_longa((U-V) * mod(S));
         }
+        else if ((m==256) || (m==64) || (m==16) || (m==4))
+        {
+        	//a[j] = mod_longa_2x((U+V) * mod(mod(k_inv)*k_inv));
+        	//a[j+t]=mod_longa_2x((U-V) * mod(mod(S*k_inv)*k_inv));
+        	//a[j] = mod_longa_2x((U+V) * mod(mod(k_inv)));
+        	a[j] = mod_longa(U+V);
+        	a[j+t]=mod_longa_2x((U-V) * mod(mod(S*k_inv)));
+        }
+
 
         int32_t tmp2 = (U-V) * mod(S*k_inv);
         int32_t tmp3 = mod_longa(U-V) * mod(S*k_inv);
@@ -430,8 +443,8 @@ void inv_ntt_longa(int32_t a[M])
 
 
         int32_t tmp = mod((U-V)*S);
-        if (tmp!=mod(a[j+t]))
-        	printf("a");
+        //if (tmp!=mod(a[j+t]))
+        //	printf("a");
       }
       j1 = j1 + 2*t;
       index++;
@@ -440,6 +453,18 @@ void inv_ntt_longa(int32_t a[M])
     index = index - m;
   }
 
+  int k_inv_multiple=k_inv;
+  k_inv_multiple = mod(k_inv_multiple*k_inv);
+  k_inv_multiple = mod(k_inv_multiple*k_inv);
+  k_inv_multiple = mod(k_inv_multiple*k_inv);
+  k_inv_multiple = mod(k_inv_multiple*k_inv);
+  k_inv_multiple = mod(k_inv_multiple*k_inv);
+  k_inv_multiple = mod(k_inv_multiple*k_inv);
+  k_inv_multiple = mod(k_inv_multiple*k_inv);
+
+  k_inv_multiple = mod(k_inv_multiple*k_inv);
+  int k_inv_multiple_less_one=mod(k_inv_multiple);
+
   int m_inv=mul_inv(M,12289);
   for (j = 0; j < t; j++)
   {
@@ -447,14 +472,14 @@ void inv_ntt_longa(int32_t a[M])
     int32_t v = a[j+t];
 
     //a[j] = mod((u+v)*m_inv);
-    a[j] = mod_longa((u+v) * mod(m_inv*k_inv));
+    a[j] = mod_longa((u+v) * mod(m_inv*k_inv_multiple_less_one));
 
     //a[j+t] = mod((u-v)*mod(m_inv*inv_psi1[1]));
-    a[j+t] = mod_longa((u-v) * mod(mod(m_inv*inv_psi1[1])*k_inv));
+    a[j+t] = mod_longa((u-v) * mod(mod(m_inv*inv_psi1[1])*k_inv_multiple));
 
-    int16_t tmp = mod((u-v)*mod(m_inv*inv_psi1[1]));
-    if (tmp!=mod(a[j+t]))
-    	printf("a");
+    //int16_t tmp = mod((u-v)*mod(m_inv*inv_psi1[1]));
+    //if (tmp!=mod(a[j+t]))
+    //	printf("a");
   }
 }
 
