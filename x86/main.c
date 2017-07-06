@@ -62,7 +62,7 @@ void unit_test_poly_mul()
 {
 	int res = 1;
 	int i,j;
-	for (i=0; (i<1000) && (res==1); i++)
+	for (i=0; (i<100) && (res==1); i++)
 	{
 		uint16_t in1[M],in2[M],out1[M],in3[M],in4[M],out2[M];
 
@@ -129,8 +129,6 @@ void main()
 	int res;
 	uint16_t large_m[M],large_a[M],large_p[M],large_r2[M],large_c1[M],large_c2[M],large1[M],large2[M];
 	uint32_t a_0[M/2],a_1[M/2];
-
-
 
 
 	res = 1;
