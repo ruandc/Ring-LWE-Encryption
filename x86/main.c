@@ -7,25 +7,6 @@
 #include "stdlib.h"
 
 
-void mul_test(int16_t* a, int16_t* b, int16_t* c, unsigned int N)
-{ // Polynomial multiplication using the schoolbook method, c[x] = a[x]*b[x]
-  // SECURITY NOTE: TO BE USED FOR TESTING ONLY.
-    unsigned int i, j, index, mask = N - 1;
-
-     for (i = 0; i < N; i++) c[i] = 0;
-
-     for (i = 0; i < N; i++) {
-          for (j = 0; j < N; j++) {
-              index = (i+j) & mask;
-              if (i+j >= N) {
-                  c[index] = mod(c[index] - (a[i]*b[j]));
-              } else {
-                  c[index] = mod(c[index] + (a[i]*b[j]));
-              }
-          }
-     }
-}
-
 void unit_test_fwd_inv_ntt_non_opt()
 {
 	int res = 1;
