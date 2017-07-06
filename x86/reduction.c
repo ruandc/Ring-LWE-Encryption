@@ -45,8 +45,8 @@ mod_longa_2x_asm:
 	//6 cycles
 */
 
-void fwd_ntt_longa(int32_t a[M]);
-void inv_ntt_longa(int32_t a[M]);
+void fwd_ntt_longa(int16_t a[M]);
+void inv_ntt_longa(int16_t a[M]);
 
 void unit_test_longa_poly_mul()
 {
@@ -118,7 +118,7 @@ void unit_test_longa_fwd_inv_ntt()
 	int i,j;
 	for (i=0; (i<1000) && (res==1); i++)
 	{
-		int32_t in1[M],in2[M];
+		int16_t in1[M],in2[M];
 
 		srand(i);
 		if (i==0)
@@ -196,10 +196,13 @@ int mul_inv(int a, int modulus )
 	return x1;
 }
 
-void fwd_ntt_longa(int32_t a[M])
+void fwd_ntt_longa(int16_t poly[M])
 {
   int t, m, i, j, j1, j2, x = 0;
   int32_t S, U, V;
+  int32_t a[M];
+  for (j=0; j<M; j++)
+	  a[j]=poly[j];
 
   t = M;
   for(m = 1; m < M; m=2*m)
@@ -237,15 +240,19 @@ void fwd_ntt_longa(int32_t a[M])
   //Need to get rid of this
   for (j=0; j<M; j++)
   {
-	  a[j]=mod(a[j]);
+	  poly[j]=mod(a[j]);
   }
 }
 
-void inv_ntt_longa(int32_t a[M])
+void inv_ntt_longa(int16_t poly[M])
 {
   int t, h, m, i, j, j1, j2, x=0, ind;
   int *index;
   int32_t S, U, V;
+  int32_t a[M];
+
+  for (j=0; j<M; j++)
+	  a[j]=poly[j];
 
   index = inv_psi1;
 
@@ -306,6 +313,9 @@ void inv_ntt_longa(int32_t a[M])
     //if (tmp!=mod(a[j+t]))
     //	printf("a");
   }
+
+  for (j=0; j<M; j++)
+	  poly[j]=mod(a[j]);
 }
 
 
