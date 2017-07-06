@@ -878,12 +878,7 @@ void inv_ntt_non_opt(int16_t a[M])
       {
         U = a[j];
         V = a[j+t];
-        /*
-        if(x%2==0)
-          a[j] = barrett_32(U + V);
-        else
-        	*/
-          a[j] = mod_big(U + V);
+        a[j] = mod_big(U + V);
 
         a[j+t] = mod_big((U-V)*S);
       }
@@ -902,88 +897,152 @@ void inv_ntt_non_opt(int16_t a[M])
 
 
 /************ structures **************/
-int32_t butterfly (int16_t *a0, int16_t *a1)
+int32_t inv_butterfly (int16_t *a0, int16_t *a1)
 {
-	int32_t temp;
+  int32_t temp;
 
-	temp = 36867 + *a0;
-	temp = temp - *a1;
-	*a0 = *a0 + *a1;
-	return temp;
+  temp = 36867 + *a0;
+  temp = temp - *a1;
+  *a0 = *a0 + *a1;
+  return temp;
 }
 
-void butterfly_without_barrett(int16_t *a0, int16_t *a1, int16_t s)
+void inv_butterfly_without_barrett(int16_t *a0, int16_t *a1, int16_t s)
 {
-	int32_t temp;
-	temp = butterfly(a0, a1);
-	temp = temp * s;
-	*a1 = mod_montgomery(temp);
+  int32_t temp;
+  temp = inv_butterfly(a0, a1);
+  temp = temp * s;
+  *a1 = mod_montgomery(temp);
 }
 
-void butterfly_with_barrett(int16_t *a0, int16_t *a1, int16_t s)
+void inv_butterfly_with_barrett(int16_t *a0, int16_t *a1, int16_t s)
 {
-	int32_t temp;
-	temp = butterfly(a0, a1);
-	*a0 = barrett_16(*a0);
-	temp = temp * s;
-	*a1 = mod_montgomery(temp);
+  int32_t temp;
+  temp = inv_butterfly(a0, a1);
+  *a0 = barrett_16(*a0);
+  temp = temp * s;
+  *a1 = mod_montgomery(temp);
 }
 
+void inv_opt_8_coeff(int16_t a[8], int offset, int m)
+{
+  int i, j, j1, j2;
+  int16_t S;
+
+  j = m/2 + offset/2;    //m/2 + offset/2
+
+  S = inv_psi2[j];
+  inv_butterfly_with_barrett(&a[0], &a[1], S);
+  S = inv_psi2[j+1];
+  inv_butterfly_with_barrett(&a[2], &a[3], S);
+  S = inv_psi2[j+2];
+  inv_butterfly_with_barrett(&a[4], &a[5], S);
+  S = inv_psi2[j+3];
+  inv_butterfly_with_barrett(&a[6], &a[7], S);
+
+  j = j/2;
+  S = inv_psi2[j];
+  inv_butterfly_without_barrett(&a[0], &a[2], S);
+  inv_butterfly_without_barrett(&a[1], &a[3], S);
+  S = inv_psi2[j+1];
+  inv_butterfly_without_barrett(&a[4], &a[6], S);
+  inv_butterfly_without_barrett(&a[5], &a[7], S);
+
+  j = j/2;
+  S = inv_psi2[j];
+  inv_butterfly_with_barrett(&a[0], &a[4], S);
+  inv_butterfly_with_barrett(&a[1], &a[5], S);
+  inv_butterfly_with_barrett(&a[2], &a[6], S);
+  inv_butterfly_with_barrett(&a[3], &a[7], S);
+}
 
 void inv_ntt_opt(int16_t a[M])
 {
-  int t, h, m, i, j, j1, j2, x=0;
+  int t, h, m, i, j, j1, j2, x=1;
   int *index;
-  int16_t S;
+  int16_t S, coeff[8];
+
+  for(i = 0; i<M; i=i+8)
+  {
+    coeff[0] = a[i];
+    coeff[1] = a[i+1];
+    coeff[2] = a[i+2];
+    coeff[3] = a[i+3];
+    coeff[4] = a[i+4];
+    coeff[5] = a[i+5];
+    coeff[6] = a[i+6];
+    coeff[7] = a[i+7];
+
+    inv_opt_8_coeff(coeff, i, 512);
+
+    a[i] = coeff[0];
+    a[i+1] = coeff[1];
+    a[i+2] = coeff[2];
+    a[i+3] = coeff[3];
+    a[i+4] = coeff[4];
+    a[i+5] = coeff[5];
+    a[i+6] = coeff[6];
+    a[i+7] = coeff[7];
+  }
+
+  for(i=0; i<M; i=i+64)
+  {
+    for(j=0; j<8;j++)
+    {
+      coeff[0] = a[i+j];
+      coeff[1] = a[i+j+8];
+      coeff[2] = a[i+j+16];
+      coeff[3] = a[i+j+24];
+      coeff[4] = a[i+j+32];
+      coeff[5] = a[i+j+40];
+      coeff[6] = a[i+j+48];
+      coeff[7] = a[i+j+56];
+
+      inv_opt_8_coeff(coeff, i/8, 64);
+
+      a[i+j] = coeff[0];
+      a[i+j+8] = coeff[1];
+      a[i+j+16] = coeff[2];
+      a[i+j+24] = coeff[3];
+      a[i+j+32] = coeff[4];
+      a[i+j+40] = coeff[5];
+      a[i+j+48] = coeff[6];
+      a[i+j+56] = coeff[7];
+    }
+  }
+
+  for(j=0; j<64;j++)
+  {
+    coeff[0] = a[j];
+    coeff[1] = a[j+64];
+    coeff[2] = a[j+128];
+    coeff[3] = a[j+192];
+    coeff[4] = a[j+256];
+    coeff[5] = a[j+320];
+    coeff[6] = a[j+384];
+    coeff[7] = a[j+448];
+
+    inv_opt_8_coeff(coeff, 0, 8);
+
+    a[j] = coeff[0];
+    a[j+64] = coeff[1];
+    a[j+128] = coeff[2];
+    a[j+192] = coeff[3];
+    a[j+256] = coeff[4];
+    a[j+320] = coeff[5];
+    a[j+384] = coeff[6];
+    a[j+448] = coeff[7];
+  }
+
 
   index = inv_psi2;
-  t = 1;
-  for (m = M; m > 1; m = m/2)
-  {
-    x++;
-    j1 = 0;
+  t = 64;
 
-    index = index + m/2;
-    for (i = 0; i < (m/2); i++)
-    {
-      j2 = j1 + t -1;
-      S = *(index);
-      for (j = j1; j<=j2; j++)
-      {
-        if(x%2==0)
-        	butterfly_with_barrett(&a[j], &a[j+t], S);
-        else
-        	butterfly_without_barrett(&a[j], &a[j+t], S);
-      }
-      j1 = j1 + 2*t;
-      index++;
-    }
-    t = 2*t;
-    index = index - m;
-  }
-  int m_inv=mul_inv(M,12289);
   for (j = 0; j < M; j++)
-    a[j] = mod_big(a[j]*m_inv);
+    a[j] = mod_big(a[j]*12265);
 }
 
-void inv_opt_8_coeff(int16_t a[M], int offset)
-{
-	int m, i, j, j1, j2;
-	int16_t S;
 
-	S = inv_psi2[offset];
-	butterfly_with_barrett(&a[offset], &a[offset+1], S);
-	S = inv_psi2[offset+2];
-	butterfly_with_barrett(&a[offset+2], &a[offset+3], S);
-	butterfly_with_barrett(&a[offset+4], &a[offset+5], S);
-	butterfly_with_barrett(&a[offset+6], &a[offset+7], S);
-
-
-//	butterfly_with_barrett(&a[j], &a[j+t], S);
-//	butterfly_with_barrett(&a[j], &a[j+t], S);
-//	butterfly_with_barrett(&a[j], &a[j+t], S);
-//	butterfly_with_barrett(&a[j], &a[j+t], S);
-}
 
 uint32_t compare_simd(uint32_t a_0[M / 2], uint32_t a_1[M / 2],
                       uint32_t large[M]) {
