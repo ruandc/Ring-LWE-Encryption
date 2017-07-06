@@ -169,6 +169,63 @@ void unit_test_longa_fwd_inv_ntt()
 		printf("OK!\n");
 }
 
+void unit_test_longa_fwd_inv_ntt_pos()
+{
+	int res = 1;
+	int i,j;
+	for (i=0; (i<1000) && (res==1); i++)
+	{
+		uint32_t in1[M],in2[M];
+
+		srand(i);
+		if (i==0)
+		{
+			//All ones for first test case
+			for (j=0; j<M; j++)
+			{
+				in1[j]=1;
+			}
+		}
+		else
+		{
+			//Random values for other test cases
+			for (j=0; j<M; j++)
+			{
+				in1[j]=rand()%16;
+			}
+		}
+		for (j=0; j<M; j++)
+		{
+			in2[j]=in1[j];
+		}
+
+		fwd_ntt_longa(in1);
+		inv_ntt_longa_pos(in1);
+
+		for (j=0; j<M; j++)
+		{
+			if (in2[j]!=mod(in1[j]))
+			{
+				res=0;
+
+				printf("\n\r in1: ");
+				int k;
+				for(k = 0; k< M; k++) printf("[%d %08d] ", k, in1[k]);
+				printf("\n\r in2: ");
+				for(k = 0; k< M; k++) printf("[%d %08d] ", k, in2[k]);
+				printf("\n\r");
+
+				break;
+			}
+		}
+	}
+	printf("unit_test_longa_fwd_inv_ntt_pos: ");
+	if (res==0)
+		printf("BAD!\n");
+	else
+		printf("OK!\n");
+}
+
 const uint32_t mask12 = ((uint64_t)1 << 12) - 1;
 
 
@@ -181,17 +238,37 @@ int32_t mod_longa(int32_t in)
 	return 3*a-b;
 }
 
+int32_t mod_longa_pos(int32_t in)
+{
+	int32_t a = mod_longa(in);
+	if (a<0)
+		a = a+6*12289;
+
+	if (a<0)
+		a = a+12289;
+	return a;
+}
+
 int32_t mod_longa_2x(int32_t in)
 {
 	uint16_t a,b;
 	int16_t c;
-	int32_t upper_bound=12289*8*mod(k_inv*k_inv);
-	int32_t lower_bound=-12289*8*mod(k_inv*k_inv);
-
 	a=(uint16_t)(in&mask12);
 	b=(uint16_t)(in>>12)&mask12;
 	c=(int16_t)(in>>24);
 	return (9*a-3*b+c);
+}
+
+int32_t mod_longa_2x_pos(int32_t in)
+{
+	int32_t a = mod_longa_2x(in);
+	if (a<0)
+		a = a+12289;
+
+	if (a<0)
+		a = a+12289;
+
+	return a;
 }
 
 //Modular inverse
@@ -381,6 +458,78 @@ void inv_ntt_longa(int32_t a[M])
   }
 }
 
+void inv_ntt_longa_pos(int32_t a[M])
+{
+  int t, h, m, i, j, j1, j2, x=0, ind;
+  int *index;
+  int32_t S, U, V;
+
+  index = inv_psi1;
+
+  t = 1;
+  for (m = M; m > 2; m = m/2)
+  {
+    x++;
+    j1 = 0;
+
+    index = index + m/2;
+    for (i = 0; i < (m/2); i++)
+    {
+      j2 = j1 + t -1;
+      S = *(index);
+      for (j = j1; j<=j2; j++)
+      {
+        U = a[j];
+        V = a[j+t];
+        //a[j] = mod(U + V);
+        //a[j+t] = mod((U-V)*S);
+        if ((m==256) || (m==64) || (m==16) || (m==4))
+        {
+        	a[j] = mod_longa_2x_pos((U+V) * mod(mod(k_inv)*k_inv));
+        	a[j+t]=mod_longa_2x_pos((U-V) * mod(mod(S*k_inv)*k_inv));
+        }
+        else
+        {
+        	a[j] = mod_longa_pos((U+V) * k_inv);
+        	a[j+t] = mod_longa_pos((U-V) * mod(S*k_inv));
+        }
+
+        int32_t tmp2 = (U-V) * mod(S*k_inv);
+        int32_t tmp3 = mod_longa(U-V) * mod(S*k_inv);
+        int32_t tmp4 = mod_longa(tmp3);
+        int32_t tmp5 = mod(tmp4);
+        int32_t tmp6 = mod_longa_2x((U-V) * mod(mod(S*k_inv)*k_inv));
+
+
+        int32_t tmp = mod((U-V)*S);
+        if (tmp!=mod(a[j+t]))
+        	printf("a");
+      }
+      j1 = j1 + 2*t;
+      index++;
+    }
+    t = 2*t;
+    index = index - m;
+  }
+
+  int m_inv=mul_inv(M,12289);
+  for (j = 0; j < t; j++)
+  {
+    int32_t u = a[j];
+    int32_t v = a[j+t];
+
+    //a[j] = mod((u+v)*m_inv);
+    a[j] = mod_longa((u+v) * mod(m_inv*k_inv));
+
+    //a[j+t] = mod((u-v)*mod(m_inv*inv_psi1[1]));
+    a[j+t] = mod_longa((u-v) * mod(mod(m_inv*inv_psi1[1])*k_inv));
+
+    int16_t tmp = mod((u-v)*mod(m_inv*inv_psi1[1]));
+    if (tmp!=mod(a[j+t]))
+    	printf("a");
+  }
+}
+
 
 void unit_test_mod_longa(int k_inv, int k_inv2)
 {
@@ -399,6 +548,47 @@ void unit_test_mod_longa(int k_inv, int k_inv2)
 		int32_t scaled_in=in;
 
 		int32_t output = mod_longa(scaled_in);
+		uint32_t output_scaled = mod(output*k_inv); //mod_longa doesn't provide a "true" mod operation. Put it in the same range as expected value
+
+		uint32_t expected = mod(in);
+
+		if (output_scaled!=expected)
+		{
+			output=mod_longa(output);
+			output_scaled = mod(output*k_inv2);
+
+			if (output_scaled!=expected)
+			{
+				printf("in=%x output=%x expected=%x\n\r",in,output,expected);
+				res=0;
+				break;
+			}
+		}
+	}
+	if (res==0)
+		printf("BAD!\n");
+	else
+		printf("OK!\n");
+}
+
+
+void unit_test_mod_longa_pos(int k_inv, int k_inv2)
+{
+	printf("unit_test_mod_longa_pos: ");
+	int i,res;
+	for (i=0; i<100000; i++)
+	{
+		int32_t in;
+		if (i==0)
+			in = INT_MIN+700000000;
+		else if (i==1)
+			in = 150994944;
+		else
+			in=rand();
+
+		int32_t scaled_in=in;
+
+		int32_t output = mod_longa_pos(scaled_in);
 		uint32_t output_scaled = mod(output*k_inv); //mod_longa doesn't provide a "true" mod operation. Put it in the same range as expected value
 
 		uint32_t expected = mod(in);
@@ -508,9 +698,11 @@ void unit_test_reduction_longa()
 
 
 	unit_test_mod_longa(k_inv, k_inv2);
+	//unit_test_mod_longa_pos(k_inv, k_inv2);
 	unit_test_mod_longa_2x(k_inv2);
 	unit_test_mod_longa_again();
 	unit_test_longa_fwd_inv_ntt();
+	unit_test_longa_fwd_inv_ntt_pos();
 
 	printf("DONE");
 
