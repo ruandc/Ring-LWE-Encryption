@@ -220,32 +220,19 @@ void main()
 	{
 		srand(i);
 		if (i==0)
-		{
-			//All ones for first test case
 			for (j=0; j<M; j++)
-			{
 				large1[j]=1;
-			}
-		}
 		else
-		{
-			//Random values for other test cases
 			for (j=0; j<M; j++)
-			{
 				large1[j]=rand()%16;
-			}
-		}
 
 		for (j=0; j<M; j++)
-		{
 			large2[j]=large1[j];
-		}
 
-		inv_ntt_non_opt(large2);
-		inv_ntt_opt(large1);
+		inv_ntt_opt(large2);
+		inv_ntt_non_opt(large1);
 
 		for (j=0; j<M; j++)
-		{
 			if (large2[j]!=large1[j])
 			{
 				int k;
@@ -253,13 +240,14 @@ void main()
 				res=0;
 				break;
 			}
-		}
 	}
 	printf("inv_ntt_non_opt/inv_ntt_opt: ");
 	if (res==0)
 		printf("BAD!\n");
 	else
 		printf("OK!\n");
+
+
 
 /*
 	res = 1;
@@ -308,7 +296,7 @@ void main()
 	unit_test_fwd_inv_ntt_non_opt();
 
 	unit_test_reduction_longa();
-	return ;
+	//return ;
 
 
 
@@ -433,10 +421,8 @@ void main()
 			large2[j]=large1[j];
 		}
 
-		fwd_ntt2(large2);
-		rearrange2(large2);
-		inv_ntt2(large2);
-		rearrange2(large2);
+		fwd_ntt_non_opt(large2);
+		inv_ntt_opt(large2);
 
 
 		for (j=0; j<M; j++)
