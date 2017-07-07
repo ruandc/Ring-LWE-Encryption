@@ -272,17 +272,6 @@ void fwd_ntt_longa(int16_t poly[M])
 		//U = mod(a[j]);
 		//V = mod(a[j+t] * S);
 
-    	mul=(int64_t)a[j+t] * mod(S*k_inv);
-
-
-    	mul1=mul;
-    	mul2=mul;
-    	//if (mul!=(int32_t)mul)
-    	//{
-    		//printf("p");
-    	//}
-
-    	//if ((m==4) || (m==32) || (m==64) || (m==256))
     	if ((m==4) || (m==32) || (m==256))
     	{
 			U = mod_longa(a[j]); 					//k
@@ -290,6 +279,13 @@ void fwd_ntt_longa(int16_t poly[M])
 			V = mul_mod_longa_2x(a[j+t],mod(S*k_inv)); 					//k
 			a[j] = (U + V);
 			a[j+t] = (U - V);
+
+			/*
+			if (a[j]!=(int16_t)a[j])
+				printf("P");
+			if (a[j+t]!=(int16_t)a[j+t])
+				printf("P");
+				*/
     	}
     	else
     	{
