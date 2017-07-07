@@ -45,8 +45,8 @@ mod_longa_2x_asm:
 	//6 cycles
 */
 
-void fwd_ntt_longa(int16_t a[M]);
-void inv_ntt_longa(int16_t a[M], int k_inv_first);
+void fwd_ntt_longa(int32_t a[M]);
+void inv_ntt_longa(int32_t a[M], int k_inv_first);
 
 
 void unit_test_longa_fwd_inv_ntt()
@@ -55,7 +55,7 @@ void unit_test_longa_fwd_inv_ntt()
 	int i,j;
 	for (i=1; (i<1000) && (res==1); i++)
 	{
-		int16_t in1[M],in2[M];
+		int32_t in1[M],in2[M];
 
 		srand(i);
 		if (i==0)
@@ -70,9 +70,8 @@ void unit_test_longa_fwd_inv_ntt()
 		fwd_ntt_longa(in1);
 		for (j=0; j<M; j++) in1[j]=mod(in1[j]);
 
-
 		int k_inv_first=k_inv;
-		for (j=0; j<7; j++) k_inv_first = mod(k_inv_first*k_inv);
+		for (j=0; j<6; j++) k_inv_first = mod(k_inv_first*k_inv);
 
 		inv_ntt_longa(in1,k_inv_first);
 
@@ -100,12 +99,12 @@ void unit_test_longa_fwd_inv_ntt()
 		printf("OK!\n");
 }
 
-void coefficient_mul_longa(uint16_t out[M], uint16_t b[], uint16_t c[]) {
+void coefficient_mul_longa(uint32_t out[M], uint32_t b[], uint32_t c[]) {
   // a = b * c
   int j;
 
   for (j = 0; j < M; j++) {
-    out[j] = mod_longa((uint32_t)((uint32_t)b[j] * (uint32_t)c[j]));
+    out[j] = mod((uint32_t)((uint32_t)b[j] * (uint32_t)c[j]));
   }
 }
 
@@ -115,7 +114,8 @@ void unit_test_longa_poly_mul()
 	int i,j;
 	for (i=0; (i<100) && (res==1); i++)
 	{
-		uint16_t in1[M],in2[M],out1[M],in3[M],in4[M],out2[M];
+		uint32_t in1[M],in2[M],out1[M];
+		int16_t in3[M],in4[M],out2[M];
 
 		srand(i);
 		if (i==0)
@@ -146,20 +146,20 @@ void unit_test_longa_poly_mul()
 		for (j=0; j<M; j++) in1[j]=mod(in1[j]);
 		fwd_ntt_longa(in2);
 		for (j=0; j<M; j++) in1[j]=mod(in1[j]);
-		coefficient_mul2(out1,in1,in2);
-		//coefficient_mul_longa(out1,in1,in2);
+		//coefficient_mul2(out1,in1,in2);
+		coefficient_mul_longa(out1,in1,in2);
 
 		for (j = 0; j < M; j++) out1[j] = mod(out1[j]);
 
 		int k_inv_first=k_inv;
-		for (j=0; j<10; j++) k_inv_first = mod(k_inv_first*k_inv);
+		for (j=0; j<9; j++) k_inv_first = mod(k_inv_first*k_inv);
 		inv_ntt_longa(out1,k_inv_first);
 
 		mul_test(in3,in4,out2,M);
 
 		for (j=0; j<M; j++)
 		{
-			if (out2[j]!=out1[j])
+			if (out2[j]!=mod(out1[j]))
 			{
 				res=0;
 
@@ -243,19 +243,10 @@ int mul_inv(int a, int modulus )
 	return x1;
 }
 
-void fwd_ntt_longa(int16_t poly[M])
+void fwd_ntt_longa(int32_t a[M])
 {
   int t, m, i, j, j1, j2, x = 0;
   int32_t S, U, V;
-  int32_t a[M];
-  int64_t add;
-  int64_t mul;
-  int32_t mul1;
-  uint32_t mul2;
-
-
-  for (j=0; j<M; j++)
-	  a[j]=poly[j];
 
   t = M;
   for(m = 1; m < M; m=2*m)
@@ -279,13 +270,6 @@ void fwd_ntt_longa(int16_t poly[M])
 			V = mul_mod_longa_2x(a[j+t],mod(S*k_inv)); 					//k
 			a[j] = (U + V);
 			a[j+t] = (U - V);
-
-			/*
-			if (a[j]!=(int16_t)a[j])
-				printf("P");
-			if (a[j+t]!=(int16_t)a[j+t])
-				printf("P");
-				*/
     	}
     	else
     	{
@@ -298,24 +282,14 @@ void fwd_ntt_longa(int16_t poly[M])
     }
   }
 
-  for (j=0; j<M; j++)
-  {
-	  poly[j]=mod(a[j]);
-
-	  //if (mod(poly[j])!=mod(a[j]))
-	  //  printf("AA");
-  }
+  /* for (j=0; j<M; j++) a[j]=mod(a[j]); */
 }
 
-void inv_ntt_longa(int16_t poly[M], int k_inv_first)
+void inv_ntt_longa(int32_t a[M], int k_inv_first)
 {
   int t, h, m, i, j, j1, j2, x=0, ind;
   int *index;
   int32_t S, U, V;
-  int32_t a[M];
-
-  for (j=0; j<M; j++)
-	  a[j]=poly[j];
 
   index = inv_psi1;
 
@@ -334,7 +308,7 @@ void inv_ntt_longa(int16_t poly[M], int k_inv_first)
       {
         U = a[j];
         V = a[j+t];
-        if ((m==512) || (m==128) || (m==32) || (m==8))
+        if ((m==512) || (m==256) || (m==64) || (m==32) || (m==8) || (m==4))
         {
         	a[j] = (U+V);							  //0
         	a[j+t] = mod_longa((U-V) * mod(S*k_inv)); //0
@@ -342,7 +316,8 @@ void inv_ntt_longa(int16_t poly[M], int k_inv_first)
         else
         {
         	a[j] = mod_longa(U+V); 					   //k
-        	a[j+t]=mod_longa_2x((U-V) * mod(S*k_inv)); //k
+        	//a[j+t]=mod_longa_2x((U-V) * mod(S*k_inv)); //k
+        	a[j+t]=mul_mod_longa_2x((U-V), mod(S*k_inv)); //k
         }
       }
       j1 = j1 + 2*t;
@@ -352,18 +327,18 @@ void inv_ntt_longa(int16_t poly[M], int k_inv_first)
     index = index - m;
   }
 
-  int m_inv=mul_inv(M,12289);
+  int m_inv=mul_inv(M,MODULUS);
   for (j = 0; j < t; j++)
   {
     U = a[j];
     V = a[j+t];
 
-    a[j] = mod_longa((U+V) * mod(m_inv*k_inv_first));
-    a[j+t] = mod_longa((U-V) * mod(mod(m_inv*inv_psi1[1])*k_inv_first));
-  }
+    //a[j] = mod_longa((U+V) * mod(m_inv*k_inv_first));
+    a[j] = mod_longa_2x((U+V) * mod(m_inv*k_inv_first));
 
-  for (j=0; j<M; j++)
-	  poly[j]=mod(a[j]); //Need to get rid of this
+    //a[j+t] = mod_longa((U-V) * mod(mod(m_inv*inv_psi1[1])*k_inv_first));
+    a[j+t] = mul_mod_longa_2x((U-V), mod(mod(m_inv*inv_psi1[1])*k_inv_first));
+  }
 }
 
 
