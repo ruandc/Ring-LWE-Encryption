@@ -10,6 +10,8 @@
 
 #include <stdint.h>
 
+extern int psi_longa[];
+extern int inv_psi1_longa[];
 extern int psi[];
 extern int inv_psi1[];
 extern int inv_psi2[];
