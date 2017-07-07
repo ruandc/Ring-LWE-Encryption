@@ -75,6 +75,25 @@ uint16_t mod(uint32_t x) {
   return (uint32_t) ret2;
 }
 
+uint16_t mod64(uint64_t x)
+{
+  int64_t a = (int64_t) x;
+  int ret2 = (a % MODULUS) >= 0 ? (a % MODULUS) : (a % MODULUS) + MODULUS;
+  while (ret2 < 0) {
+    ret2 += MODULUS;
+  }
+  while (ret2 > MODULUS) {
+    ret2 -= MODULUS;
+  }
+#ifdef DEBUG_PRINTF
+  if (!(ret2 >= 0 && ret2 < MODULUS)) {
+    printf("error: %d\n", ret2);
+  }
+#endif
+  assert(ret2 >= 0 && ret2 < MODULUS);
+  return (uint16_t) ret2;
+}
+
 
 
 int16_t barrett_32(uint32_t a)
