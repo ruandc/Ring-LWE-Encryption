@@ -8,8 +8,9 @@ LDFLAGS=
 SOURCES=main.c \
 	lwe.c \
 	lwe_original.c \
-	reduction.c \
-	luts.c
+	reduction_longa_3x.c \
+	luts.c \
+	reduction_longa_2x.c
 		
 OBJECTS1=$(SOURCES:.S=.o)
 OBJECTS2=$(OBJECTS1:.s=.o)

@@ -3,7 +3,7 @@
 #include "lwe.h"
 #include "stdio.h"
 #include "lwe_original.h"
-#include "reduction.h"
+#include "reduction_longa_3x.h"
 #include "stdlib.h"
 
 
@@ -295,7 +295,8 @@ void main()
 	unit_test_poly_mul();
 	unit_test_fwd_inv_ntt_non_opt();
 
-	unit_test_reduction_longa();
+	unit_test_reduction_longa_3x();
+	unit_test_reduction_longa_2x();
 	//return ;
 
 

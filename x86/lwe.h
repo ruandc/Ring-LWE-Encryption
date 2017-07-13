@@ -29,6 +29,7 @@ void knuth_yao2(uint16_t a[M]);
 void knuth_yao_shuffled(uint16_t result[M]);
 
 uint16_t mod(uint32_t a);
+uint16_t mod64(int64_t x);
 uint32_t compare_simd(uint32_t a_0[128], uint32_t a_1[128], uint32_t large[M]);
 uint32_t compare_large_simd(uint32_t large_simd[M / 2], uint32_t large[M]);
 void coefficient_add2(uint16_t out[M], uint16_t b[M], uint16_t c[M]);

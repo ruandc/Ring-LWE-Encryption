@@ -1,6 +1,14 @@
 #ifndef __GLOBAL_H_
 #define __GLOBAL_H_
 
+#include <stdint.h>
+
+//const uint32_t k_inv = 8193;
+//const uint32_t mask12 = ((uint64_t)1 << 12) - 1;
+#define k_inv 8193
+#define mask12 (((uint64_t)1 << 12) - 1)
+
+
 //#define DEBUG_PRINTF
 
 //#define USE_FAKE_GET_RAND

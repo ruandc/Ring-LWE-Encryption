@@ -75,7 +75,7 @@ uint16_t mod(uint32_t x) {
   return (uint32_t) ret2;
 }
 
-uint16_t mod64(uint64_t x)
+uint16_t mod64(int64_t x)
 {
   int64_t a = (int64_t) x;
   int ret2 = (a % MODULUS) >= 0 ? (a % MODULUS) : (a % MODULUS) + MODULUS;

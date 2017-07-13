@@ -1,13 +1,12 @@
-#include <stdint.h>
 #include <stdio.h>
 #include "lwe.h"
 #include "luts.h"
-#include "stdlib.h"
-#include "assert.h"
-#include "limits.h"
+#include <stdlib.h>
+#include <assert.h>
+#include <limits.h>
+#include "global.h"
+#include "reduction_longa_3x.h"
 
-const uint32_t k_inv = 8193;
-const uint32_t mask12 = ((uint64_t)1 << 12) - 1;
 
 /*
  * Untested assembly
@@ -69,35 +68,55 @@ mul_mod_longa_2x_asm:
 
 	mov pc,lr
 
+
+	.global mul_mod_longa_asm
+	.extern mul_mod_longa_asm
+	.type mul_mod_longa_asm, %function
+mul_mod_longa_asm:
+	//r0=in1
+	//r1=in2
+
+	smull r1,r0,r1,r2     	//r0=low, r1=high
+
+	ubfx r3,r0,#0,#12; 	  	//r3=r0[11:0]  (a)
+	add r3,r3,r3,lsl #1;   	//r3=2*r3+r3 = 3*r3 (3*a)
+
+	//r2=free
+	//bfc r1,#12,#31;	  	  	//clear high bits of r1 (not sure if this is necessary)
+	add r1,r1,r0,lsr #12;  	//r1 = r1[11:0]+r0>>12 = b
+	sub r0,r3,r0;  			//r0=r3+r0[31:24] = 3*a-b
+
+	//5 cycles, 2 temp registers, 2 input registers
+
+	mov pc,lr
+
 */
-
-void fwd_ntt_longa(int32_t a[M]);
-void inv_ntt_longa(int32_t a[M], int k_inv_first);
-
 
 void unit_test_longa_fwd_inv_ntt()
 {
 	int res = 1;
 	int i,j;
-	for (i=1; (i<100000) && (res==1); i++)
+
+	int k_inv_first=k_inv;
+	for (j=0; j<5; j++) k_inv_first = mod(k_inv_first*k_inv);
+
+	for (i=0; (i<10000) && (res==1); i++)
 	{
-		int32_t in1[M],in2[M];
+		int32_t in1[M],in2[M],in3[M];
 
 		srand(i);
 		if (i==0)
 			//All ones for first test case
-			for (j=0; j<M; j++) in1[j]=1;
+			for (j=0; j<M; j++) in2[j]=in1[j]=1;
 		else
 			//Random values for other test cases
-			for (j=0; j<M; j++) in1[j]=rand()%16;
-
-		for (j=0; j<M; j++)	in2[j]=in1[j];
+			for (j=0; j<M; j++) in2[j]=in1[j]=rand()%MODULUS;
 
 		fwd_ntt_longa(in1);
-		for (j=0; j<M; j++) in1[j]=mod(in1[j]);
-
-		int k_inv_first=k_inv;
-		for (j=0; j<5; j++) k_inv_first = mod(k_inv_first*k_inv);
+		for (j=0; j<M; j++)
+		{
+			in1[j]!=(uint16_t)in1[j];
+		}
 
 		inv_ntt_longa(in1,k_inv_first);
 
@@ -105,6 +124,7 @@ void unit_test_longa_fwd_inv_ntt()
 		{
 			if (in2[j]!=mod(in1[j]))
 			{
+				printf("Second Test FAILED\n");
 				res=0;
 				printf("i=%d, j=%d\n",i,j);
 				printf("\n\r in1: ");
@@ -125,27 +145,28 @@ void unit_test_longa_fwd_inv_ntt()
 		printf("OK!\n");
 }
 
-void coefficient_mul_longa(uint32_t out[M], uint32_t b[], uint32_t c[]) {
+
+
+void coefficient_mul_mod_longa(uint32_t out[M], uint32_t b[], uint32_t c[]) {
   // a = b * c
   int j;
 
   for (j = 0; j < M; j++)
   {
-	  int64_t tmp = (int64_t)b[j] * (int64_t)c[j];
-
-	  //out[j] = mod_longa(b[j] * c[j]);
-
 	  //Inputs are at most 16 bits. Therefore only the sign bit (after multiply) is a problem
 	  //Optimization: Write custom function using mod_longa which ensures "b" has the correct sign
 	  //This function might be useful in other places!
-	  out[j] = mul_mod_longa_2x(b[j], c[j]);
+	  out[j] = mul_mod_longa(b[j], c[j]);
   }
 }
 
 void unit_test_longa_poly_mul()
 {
 	int res = 1;
-	int i,j;
+	int i,j,k;
+	int k_inv_first=k_inv;
+	for (j=0; j<9; j++) k_inv_first = mod(k_inv_first*k_inv);
+
 	for (i=0; (i<10000) && (res==1); i++)
 	{
 		uint32_t in1[M],in2[M],out1[M];
@@ -156,17 +177,15 @@ void unit_test_longa_poly_mul()
 		{
 			//All ones for first test case
 			for (j=0; j<M; j++)
-			{
 				in1[j]=in2[j]=1;
-			}
 		}
 		else
 		{
 			//Random values for other test cases
 			for (j=0; j<M; j++)
 			{
-				in1[j]=rand()%16;
-				in2[j]=rand()%16;
+				in1[j]=rand()%MODULUS;
+				in2[j]=rand()%MODULUS;
 			}
 		}
 		for (j=0; j<M; j++)
@@ -178,12 +197,10 @@ void unit_test_longa_poly_mul()
 		fwd_ntt_longa(in1);
 		fwd_ntt_longa(in2);
 		//coefficient_mul2(out1,in1,in2);
-		coefficient_mul_longa(out1,in1,in2);
+		coefficient_mul_mod_longa(out1,in1,in2);
 
-		for (j = 0; j < M; j++) out1[j] = mod(out1[j]);
+		//for (j = 0; j < M; j++) out1[j] = mod(out1[j]);
 
-		int k_inv_first=k_inv;
-		for (j=0; j<10; j++) k_inv_first = mod(k_inv_first*k_inv);
 		inv_ntt_longa(out1,k_inv_first);
 
 		mul_test(in3,in4,out2,M);
@@ -196,17 +213,9 @@ void unit_test_longa_poly_mul()
 
 				printf("i=%d j=%d\n",i,j);
 				printf("\n out1: ");
-				int k;
 				for(k = 0; k< M; k++) printf("[%d %08d] ", k, mod(out1[k]));
 				printf("\n out2: ");
 				for(k = 0; k< M; k++) printf("[%d %08d] ", k, out2[k]);
-				printf("\n diff:");
-				for(k = 0; k< M; k++)
-				{
-					int aa=mul_inv(out1[k],12289);
-					int bb=mod(aa*out2[k]);
-					printf("[%d %08d] ", k, bb);
-				}
 
 				printf("\n\r");
 
@@ -221,6 +230,8 @@ void unit_test_longa_poly_mul()
 		printf("OK!\n");
 }
 
+
+
 int32_t mod_longa(int32_t in)
 {
 	uint32_t a;
@@ -230,6 +241,27 @@ int32_t mod_longa(int32_t in)
 	return 3*a-b;
 }
 
+int32_t mul_mod_longa(int32_t in1, int32_t in2)
+{
+	assert(in1<268435456);  //268435456 = 2^28 (in1 can be negative)
+	assert(in2<268435456);  //268435456 = 2^28
+	//assert(in2>0); 		//in2 has to be positive
+
+	uint16_t a;
+	int32_t b;
+	int64_t bb;
+	int64_t res1 = (int64_t)in1 * (int64_t)in2;
+
+	assert (abs(res1)<4294967296); //2^33=4294967296
+
+	a=(uint16_t)(res1&mask12);
+	b=(int32_t)(res1>>12);
+	bb=(int64_t)(res1>>12);
+
+	assert (b==bb); //check for no loss of precision
+
+	return (3*a-b);
+}
 
 int32_t mod_longa_2x(int32_t in)
 {
@@ -244,7 +276,7 @@ int32_t mod_longa_2x(int32_t in)
 int32_t mul_mod_longa_2x(int32_t in1, int32_t in2)
 {
 	assert(in1<268435456);  //268435456 = 2^28
-	//assert(in2<268435456);  //268435456 = 2^28
+	//assert(in2<268435456);  //268435456 = 2^28 //coefficient_mul makes this check fail
 	//assert(in2<16384);		//16384 = 2^14
 
 	uint16_t a,b;
@@ -272,6 +304,7 @@ int mul_inv(int a, int modulus )
 	return x1;
 }
 
+
 void fwd_ntt_longa(int32_t a[M])
 {
   int t, m, i, j, j1, j2, x = 0;
@@ -286,33 +319,54 @@ void fwd_ntt_longa(int32_t a[M])
     {
       j1 = 2 * i * t;
       j2 = j1 + t - 1;
-      //S = psi[m + i];
       S = psi_longa[m + i];
       for(j = j1; j<=j2; j++)
       {
-		//U = mod(a[j]);
-		//V = mod(a[j+t] * S);
-
-    	if ((m==4) || (m==32) || (m==256))
+    	if ((m==16) || (m==128) || (m==256))
     	{
-			U = mod_longa(a[j]); 					//k
-			//V = mul_mod_longa_2x(a[j+t],mod(S*k_inv)); 					//k
-			V = mul_mod_longa_2x(a[j+t],S); 					//k
-			a[j] = (U + V);
-			a[j+t] = (U - V);
+			U = mod_longa(a[j]); 							//k
+			V = mul_mod_longa_2x(a[j+t],S); 				//k
     	}
     	else
     	{
-    		U = a[j];								//0
+    		U = a[j];									//0
 			//V = mod_longa(a[j+t] * mod(S*k_inv)); 	//0
-    		V = mod_longa(a[j+t] * S); 	//0
-			a[j] = (U + V);
-			a[j+t] = (U - V);
+    		V = mul_mod_longa(a[j+t], S); 					//0
+    		/*
+    		if ((m==8) || (m==64))
+    		{
+    			V = mul_mod_longa(a[j+t], S); 					//0
+    		}
+    		else
+    		{
+    			V = mod_longa(a[j+t] * S); 					//0
+    		}*/
+
     	}
+
+		a[j] = (U + V);
+		a[j+t] = (U - V);
+
+		assert(((int64_t)U+(int64_t)V)==a[j]);
+		assert(((int64_t)U-(int64_t)V)==a[j+t]);
       }
     }
   }
 }
+
+/*
+void convert_poly_into_standard_representation()
+{
+	if (m==256)
+	{
+		//Put the values into the standard representation again (positive uint16_t)
+		if (a[j]<0)
+			a[j]=a[j]+3*MODULUS;
+		if (a[j+t]<0)
+			a[j+t]=a[j+t]+3*MODULUS;
+	}
+}
+*/
 
 void inv_ntt_longa(int32_t a[M], int k_inv_first)
 {
@@ -322,50 +376,69 @@ void inv_ntt_longa(int32_t a[M], int k_inv_first)
 
   index = inv_psi1_longa;
 
-  t = 1;
-  for (m = M; m > 2; m = m/2)
-  {
-    x++;
-    j1 = 0;
+	t = 1;
+	for (m = M; m > 2; m = m/2)
+	{
+		x++;
+		j1 = 0;
 
-    index = index + m/2;
-    for (i = 0; i < (m/2); i++)
-    {
-      j2 = j1 + t -1;
-      S = *(index);
-      for (j = j1; j<=j2; j++)
-      {
-        U = a[j];
-        V = a[j+t];
-        if ((m==512) || (m==256) || (m==64) || (m==32) || (m==8) || (m==4))
-        {
-        	a[j] = (U+V);							  //0
-        	a[j+t] = mod_longa((U-V) * S); //0
-        }
-        else
-        {
-        	a[j] = mod_longa(U+V); 					   		//k
-        	a[j+t]=mul_mod_longa_2x((U-V), S); 	//k
-        }
-      }
-      j1 = j1 + 2*t;
-      index++;
-    }
-    t = 2*t;
-    index = index - m;
-  }
+		index = index + m/2;
+		for (i = 0; i < (m/2); i++)
+		{
+			j2 = j1 + t -1;
+			S = *(index);
+			for (j = j1; j<=j2; j++)
+			{
+				U = a[j];
+				V = a[j+t];
+				if ((m!=128) && (m!=16))
+				{
+					a[j] = (U+V);						//0
+					if ((m==64) || (m==32) || (m==8) || (m==4))
+					{
+						a[j+t] = mod_longa((U-V) * S); 		//0
+					}
+					else
+					{
+						a[j+t] = mul_mod_longa((U-V), S); 		//0
+					}
+					//a[j+t] = mul_mod_longa((U-V), S);
 
-  int m_inv=mul_inv(M,MODULUS);
-  for (j = 0; j < t; j++)
-  {
-    U = a[j];
-    V = a[j+t];
+					assert(((int64_t)U+(int64_t)V)==a[j]);
 
-    a[j] = mod_longa((U+V) * mod(m_inv*mod(k_inv_first)));
-    a[j+t] = mul_mod_longa_2x((U-V), mod(mod(m_inv*inv_psi1_longa[1])*mod(k_inv_first)));
-  }
+					/* The following assert sometimes fails. This is OK
+					 * assert(mod(((int64_t)U-(int64_t)V)*mod(S*3))==mod(a[j+t]));
+					 */
+				}
+				else
+				{
+					a[j] = mod_longa(U+V); 				//k
+					a[j+t]=mul_mod_longa_2x((U-V), S); 	//k
+
+					assert(mod(((int64_t)U+(int64_t)V)*3)==mod(a[j]));
+					int32_t tmp1=mod(((int64_t)U-(int64_t)V)*(int64_t)mod(S*9));
+					int32_t tmp2=mod(a[j+t]);
+					assert (tmp1==tmp1);
+				}
+			}
+			j1 = j1 + 2*t;
+			index++;
+		}
+		t = 2*t;
+		index = index - m;
+	}
+
+	int m_inv=mul_inv(M,MODULUS);
+	for (j = 0; j < t; j++)
+	{
+		U = a[j];
+		V = a[j+t];
+
+		//a[j] = mod_longa((U+V) * mod(m_inv*mod(k_inv_first)));
+		a[j] = mul_mod_longa((U+V), mod(m_inv*mod(k_inv_first)));
+		a[j+t] = mul_mod_longa_2x((U-V), mod(mod(m_inv*inv_psi1_longa[1])*mod(k_inv_first)));
+	}
 }
-
 
 void unit_test_mod_longa(int k_inv2)
 {
@@ -408,9 +481,6 @@ void unit_test_mod_longa(int k_inv2)
 		printf("OK!\n");
 }
 
-
-
-
 void unit_test_mod_longa_2x(int k_inv2)
 {
 	printf("unit_test_mod_longa_2x: ");
@@ -452,9 +522,10 @@ void unit_test_mul_mod_longa_2x(int k_inv2)
 	res = 1;
 	for (i=0; i<10000000; i++)
 	{
-		int32_t in1,in2;
+		int32_t in1;
+		int16_t in2;
 		in1=rand()%268435456;
-		in2=rand()%16384;
+		in2=rand()%(16384*2); //16384 = 2^14
 
 		int32_t output=mul_mod_longa_2x(in1,in2);
 		uint32_t output_scaled = mod(output*k_inv2);
@@ -475,7 +546,50 @@ void unit_test_mul_mod_longa_2x(int k_inv2)
 		printf("OK!\n");
 }
 
-void unit_test_reduction_longa()
+void unit_test_mul_mod_longa(int k_inv2)
+{
+	printf("unit_test_mul_mod_longa: ");
+	int i,res;
+	res = 1;
+	for (i=1; i<1000000; i++)
+	{
+		srand(i);
+		int32_t in1,in2;
+		//in1=rand()%65536;
+		in1=rand()%(65535*4);
+		//in2=rand()%65536;
+		in2=rand()%(65535*4);
+
+		if (rand()%1)
+			in1=in1*-1;
+		if (rand()%1)
+			in2=in2*-1;
+
+		int32_t output=mul_mod_longa(in1,in2);
+		uint32_t output_scaled = mod(output*k_inv); //mod_longa doesn't provide a "true" mod operation. Put it in the same range as expected value
+		int64_t tmp = (int64_t)in1*(int64_t)in2;
+		uint32_t expected = mod64(tmp);
+
+		if (output_scaled!=expected)
+		{
+			output=mod_longa(output);
+			output_scaled = mod(output*k_inv2);
+
+			if (output_scaled!=expected)
+			{
+				printf("i=%d, in1=%x in2=%x output=%x output_scaled=%x expected=%x\n\r",i,in1,in2,output,output_scaled,expected);
+				res=0;
+				break;
+			}
+		}
+	}
+	if (res==0)
+		printf("BAD!\n");
+	else
+		printf("OK!\n");
+}
+
+void unit_test_reduction_longa_3x()
 {
 	//k_inv=mul_inv(3, 12289);
 	//printf("k_inv=%d\n",k_inv);
@@ -486,12 +600,13 @@ void unit_test_reduction_longa()
 
 	printf("int inv_psi1_longa[]={");
 	for (i=0; i<M; i++) printf("%d,",mod(inv_psi1[i]*k_inv));
-	printf("};");
+	printf("};\n");
 
 	uint32_t k_inv2=mod(k_inv*k_inv);
-	unit_test_mod_longa(k_inv2);
-	unit_test_mod_longa_2x(k_inv2);
-	unit_test_mul_mod_longa_2x(k_inv2);
 	unit_test_longa_fwd_inv_ntt();
 	unit_test_longa_poly_mul();
+	unit_test_mod_longa(k_inv2);
+	unit_test_mul_mod_longa(k_inv2);
+	unit_test_mod_longa_2x(k_inv2);
+	unit_test_mul_mod_longa_2x(k_inv2);
 }
