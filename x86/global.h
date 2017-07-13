@@ -46,7 +46,7 @@
 
 
 #define NTT512
-//#define KNUTH_YAO_512
+#define KNUTH_YAO_512
 
 #ifdef KNUTH_YAO_512
 	#define LOW_MSB 26

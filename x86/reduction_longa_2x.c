@@ -215,16 +215,18 @@ void fwd_ntt_longa2(int32_t a[M])
 
     	if ((m==16) || (m==256))
     	{
-			U = mod_longa(a[j]); 							//k
-			V = mul_mod_longa_2x(a[j+t],S); 				//k
+			U = mod_longa(a[j]);
+			V = mul_mod_longa_2x(a[j+t],S);
 			a[j] = (U + V);
 			a[j+t] = (U - V);
     	}
     	else
     	{
-    		U = a[j];									//0
-			//V = mod_longa(a[j+t] * mod(S*k_inv)); 	//0
-    		V = mul_mod_longa(a[j+t], S); 				//0
+    		U = a[j];
+    		if ((m==1) || (m==2) || (m==4) || (m==32) || (m==64))
+    			V = mod_longa(a[j+t] * mod(S));
+    		else
+    			V = mul_mod_longa(a[j+t], S);
 
 			a[j] = (U + V);
 			a[j+t] = (U - V);
@@ -289,8 +291,6 @@ void unit_test_longa_fwd_inv_ntt2()
 		printf("OK!\n");
 }
 
-
-
 void inv_ntt_longa2(int32_t a[M], int k_inv_first)
 {
   int t, h, m, i, j, j1, j2, x=0, ind;
@@ -318,14 +318,10 @@ void inv_ntt_longa2(int32_t a[M], int k_inv_first)
 				{
 					a[j] = (U+V);						//0
 					if ((m==512) || (m==16) || (m==8))
-					{
 						a[j+t] = mod_longa((U-V) * S); 		//0
-					}
 					else
-					{
 						//Levels that have to do 64-bit mul: 256,128,64,4
 						a[j+t] = mul_mod_longa((U-V), S); 		//0
-					}
 
 					assert(((int64_t)U+(int64_t)V)==a[j]);
 
