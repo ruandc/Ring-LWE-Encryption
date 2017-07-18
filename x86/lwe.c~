@@ -915,7 +915,7 @@ void inv_ntt_non_opt(int16_t a[M])
 
 
 
-/******************* structures **************/
+/************ structures **************/
 int32_t inv_butterfly (int16_t *a0, int16_t *a1)
 {
   int32_t temp;
