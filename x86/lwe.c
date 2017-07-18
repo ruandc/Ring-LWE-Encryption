@@ -785,36 +785,79 @@ void fwd_opt_8_coeff(int16_t a[8], int offset)
 
 void fwd_ntt_opt(int16_t a[M])
 {
-  int t, m, i, j, j1, j2, x = 0;
-  int16_t S, U, V;
+    int t, m, i, j, j1, j2, x = 0;
+  int16_t S, U, V, coeff[8];
 
-  t = M;
-  for(m = 1; m < M; m=2*m)
+  for(j=0; j<64; j++)
   {
-    x++;
-    t = t/2;
-    for (i = 0; i < m; i++)
-    {
-      j1 = 2 * i * t;
-      j2 = j1 + t - 1;
-      S = psi[m + i];
-      for(j = j1; j<=j2; j++)
-      {
-        U = a[j];
-        V = mod_big(a[j+t] * S);
+    coeff[0] = a[j];
+    coeff[1] = a[j+64];
+    coeff[2] = a[j+128];
+    coeff[3] = a[j+192];
+    coeff[4] = a[j+256];
+    coeff[5] = a[j+320];
+    coeff[6] = a[j+384];
+    coeff[7] = a[j+448];
 
-        if(x%2==0)
-        {
-          a[j] = mod(U + V);
-          a[j+t] = mod(U - V);
-        }
-        else
-        {
-          a[j] = U + V;
-          a[j+t] = U - V;
-        }
-      }
+    fwd_opt_8_coeff(coeff, 8);
+
+    a[j] = coeff[0];
+    a[j+64] = coeff[1];
+    a[j+128] = coeff[2];
+    a[j+192] = coeff[3];
+    a[j+256] = coeff[4];
+    a[j+320] = coeff[5];
+    a[j+384] = coeff[6];
+    a[j+448] = coeff[7];
+  }
+
+  for(i=0; i<M; i=i+64)
+  {
+    for(j=0; j<8;j++)
+    {
+      coeff[0] = a[i+j];
+      coeff[1] = a[i+j+8];
+      coeff[2] = a[i+j+16];
+      coeff[3] = a[i+j+24];
+      coeff[4] = a[i+j+32];
+      coeff[5] = a[i+j+40];
+      coeff[6] = a[i+j+48];
+      coeff[7] = a[i+j+56];
+
+      fwd_opt_8_coeff(coeff, i/8 + 64);
+
+      a[i+j] = coeff[0];
+      a[i+j+8] = coeff[1];
+      a[i+j+16] = coeff[2];
+      a[i+j+24] = coeff[3];
+      a[i+j+32] = coeff[4];
+      a[i+j+40] = coeff[5];
+      a[i+j+48] = coeff[6];
+      a[i+j+56] = coeff[7];
     }
+  }
+
+  for(i = 0; i<M; i=i+8)
+  {
+    coeff[0] = a[i];
+    coeff[1] = a[i+1];
+    coeff[2] = a[i+2];
+    coeff[3] = a[i+3];
+    coeff[4] = a[i+4];
+    coeff[5] = a[i+5];
+    coeff[6] = a[i+6];
+    coeff[7] = a[i+7];
+
+    fwd_opt_8_coeff(coeff, i+512);
+
+    a[i] = coeff[0];
+    a[i+1] = coeff[1];
+    a[i+2] = coeff[2];
+    a[i+3] = coeff[3];
+    a[i+4] = coeff[4];
+    a[i+5] = coeff[5];
+    a[i+6] = coeff[6];
+    a[i+7] = coeff[7];
   }
 }
 
