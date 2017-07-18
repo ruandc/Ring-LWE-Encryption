@@ -720,6 +720,68 @@ void fwd_ntt_non_opt(int16_t a[M])
   }
 }
 
+/********************************** structures for fwd_ntt *******************************/
+
+int16_t fwd_butterfly(int16_t *a0, int16_t *a1, int16_t s)
+{
+  int32_t temp;
+  temp = *a1 * s;
+  temp = mod_big(temp);
+  return temp;
+}
+
+void fwd_butterfly_with_barrett(int16_t *a0, int16_t *a1, int16_t s)
+{
+  int32_t temp1, temp2;
+  temp1 = fwd_butterfly(a0, a1, s);
+  temp2 = *a0 - temp1;
+  *a1 = barrett_32(temp2);
+  temp2 = *a0 + temp1;
+  *a0 = barrett_32(temp2);
+}
+
+void fwd_butterfly_without_barrett(int16_t *a0, int16_t *a1, int16_t s)
+{
+  int32_t temp;
+  temp = fwd_butterfly(a0, a1, s);
+  *a1 = *a0 - temp;
+  *a0 = *a0 + temp;
+}
+
+void fwd_opt_8_coeff(int16_t a[8], int offset)
+{
+  int i, j, j1, j2, j3;
+  int16_t S;
+
+  j1 = offset/2;
+  j2 = j1/2;
+  j3 = j2/2;
+
+  S = psi[j3];
+  fwd_butterfly_with_barrett(&a[0], &a[4], S);
+  fwd_butterfly_with_barrett(&a[1], &a[5], S);
+  fwd_butterfly_with_barrett(&a[2], &a[6], S);
+  fwd_butterfly_with_barrett(&a[3], &a[7], S);
+
+  j = j*2;
+  S = psi[j2];
+  fwd_butterfly_with_barrett(&a[0], &a[2], S);
+  fwd_butterfly_with_barrett(&a[1], &a[3], S);
+  S = psi[j2+1];
+  fwd_butterfly_with_barrett(&a[4], &a[6], S);
+  fwd_butterfly_with_barrett(&a[5], &a[7], S);
+
+  j = j*2;
+  S = psi[j1];
+  fwd_butterfly_with_barrett(&a[0], &a[1], S);
+  S = psi[j1+1];
+  fwd_butterfly_with_barrett(&a[2], &a[3], S);
+  S = psi[j1+2];
+  fwd_butterfly_with_barrett(&a[4], &a[5], S);
+  S = psi[j1+3];
+  fwd_butterfly_with_barrett(&a[6], &a[7], S);
+}
+
 
 void fwd_ntt_opt(int16_t a[M])
 {
@@ -915,7 +977,7 @@ void inv_ntt_non_opt(int16_t a[M])
 
 
 
-/******************* structures **************/
+/***************************** structures for inv_ntt ****************************/
 int32_t inv_butterfly (int16_t *a0, int16_t *a1)
 {
   int32_t temp;
