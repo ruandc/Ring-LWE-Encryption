@@ -509,47 +509,6 @@ uint32_t knuth_yao_single_number(uint32_t *rnd, int * sample_in_table)
   return 0xffffffff;
 }
 
-void a_gen2(uint16_t a[]) {
-  uint32_t i, r;
-
-  for (i = 0; i < M / 2; i++) {
-    r = (uint32_t)rand();
-    a[2 * i] = mod(r & 0xffff);
-    a[2 * i + 1] = mod((r >> 16));
-  }
-
-  fwd_ntt2(a);
-}
-
-void r1_gen2(uint16_t r1[]) {
-
-	#ifdef USE_KNUTH_YAO_SHUFFLE
-		knuth_yao_shuffled(r1);
-	#else
-		knuth_yao2(r1);
-	#endif
-
-	fwd_ntt2(r1);
-}
-
-void r2_gen2(uint16_t r2[M]) {
-  uint16_t i, j, r, bit, sign;
-
-  for (i = 0; i < M;) {
-    r = (uint16_t) rand(); // NB: Need to ensure that this is a good source of entropy
-
-    for (j = 0; j < 16; j++) {
-      bit = r & 1;
-      sign = (r >> 1) & 1;
-      if (sign == 1 && bit == 1)
-        bit = (MODULUS - 1);
-      r2[i++] = bit;
-      r = r >> 2;
-    }
-  }
-  fwd_ntt2(r2);
-}
-
 void rearrange2(uint16_t a[M]) {
   uint32_t i;
   uint32_t bit1, bit2, bit3, bit4, bit5, bit6, bit7;
@@ -712,9 +671,9 @@ void fwd_ntt_non_opt(int16_t a[M])
       for(j = j1; j<=j2; j++)
       {
 		U = a[j];
-		V = mod(a[j+t] * S);
-		a[j] = mod(U + V);
-		a[j+t] = mod(U - V);
+		V = mod_big(a[j+t] * S);
+		a[j] = barrett_32(U + V);
+		a[j+t] = barrett_32(U - V);
       }
     }
   }
@@ -1233,6 +1192,47 @@ void coefficient_sub2(uint16_t result[M], uint16_t b[M], uint16_t c[M]) {
   }
 }
 
+void a_gen2(uint16_t a[]) {
+  uint32_t i, r;
+
+  for (i = 0; i < M / 2; i++) {
+    r = (uint32_t)rand();
+    a[2 * i] = mod(r & 0xffff);
+    a[2 * i + 1] = mod((r >> 16));
+  }
+
+  fwd_ntt_opt(a);
+}
+
+void r1_gen2(uint16_t r1[]) {
+
+  #ifdef USE_KNUTH_YAO_SHUFFLE
+    knuth_yao_shuffled(r1);
+  #else
+    knuth_yao2(r1);
+  #endif
+
+  fwd_ntt_opt(r1);
+}
+
+void r2_gen2(uint16_t r2[M]) {
+  uint16_t i, j, r, bit, sign;
+
+  for (i = 0; i < M;) {
+    r = (uint16_t) rand(); // NB: Need to ensure that this is a good source of entropy
+
+    for (j = 0; j < 16; j++) {
+      bit = r & 1;
+      sign = (r >> 1) & 1;
+      if (sign == 1 && bit == 1)
+        bit = (MODULUS - 1);
+      r2[i++] = bit;
+      r = r >> 2;
+    }
+  }
+  fwd_ntt_opt(r2);
+}
+
 void key_gen2(uint16_t a[M], uint16_t p[M], uint16_t r2[M]) {
   a_gen2(a);
   r1_gen2(p);
@@ -1245,7 +1245,7 @@ void key_gen2(uint16_t a[M], uint16_t p[M], uint16_t r2[M]) {
   // p = p-a*r2
   coefficient_sub2(p, p, tmp_a);
 
-  rearrange2(r2);
+  //rearrange2(r2);
 }
 
 void RLWE_enc2(uint16_t a[M], uint16_t c1[M], uint16_t c2[M], uint16_t m[M], uint16_t p[M])
@@ -1269,9 +1269,9 @@ void RLWE_enc2(uint16_t a[M], uint16_t c1[M], uint16_t c2[M], uint16_t m[M], uin
 
   coefficient_add2(e3, e3, encoded_m); // e3 <-- e3 + m
 
-  fwd_ntt2(e1);
-  fwd_ntt2(e2);
-  fwd_ntt2(e3);
+  fwd_ntt_opt(e1);
+  fwd_ntt_opt(e2);
+  fwd_ntt_opt(e3);
 
   // m <-- a*e1
   coefficient_mul2(c1, a, e1);  // c1 <-- a*e1
@@ -1279,8 +1279,8 @@ void RLWE_enc2(uint16_t a[M], uint16_t c1[M], uint16_t c2[M], uint16_t m[M], uin
   coefficient_mul2(c2, p, e1);  // c2 <-- p*e1
   coefficient_add2(c2, e3, c2); // c2<-- e3 + p*e1
 
-  rearrange2(c1);
-  rearrange2(c2);
+  //rearrange2(c1);
+  //rearrange2(c2);
 }
 
 void RLWE_dec2(uint16_t c1[M], uint16_t c2[M], uint16_t r2[M])
@@ -1288,7 +1288,8 @@ void RLWE_dec2(uint16_t c1[M], uint16_t c2[M], uint16_t r2[M])
   coefficient_mul2(c1, c1, r2); // c1 <-- c1*r2
   coefficient_add2(c1, c1, c2); // c1 <-- c1*r2 + c2
 
-  inv_ntt2(c1);
+  inv_ntt_opt(c1);
+  rearrange2(c1);
 }
 
 void message_gen2(uint16_t m[M]) {
